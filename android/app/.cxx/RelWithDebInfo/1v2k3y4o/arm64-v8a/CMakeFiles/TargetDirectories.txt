@@ -1,0 +1,2 @@
+C:/Users/raghu/Downloads/hitagyana_college_finder/hitagyana_college_finder/android/app/.cxx/RelWithDebInfo/1v2k3y4o/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/raghu/Downloads/hitagyana_college_finder/hitagyana_college_finder/android/app/.cxx/RelWithDebInfo/1v2k3y4o/arm64-v8a/CMakeFiles/rebuild_cache.dir

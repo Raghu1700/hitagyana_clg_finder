@@ -1,0 +1,36 @@
+{
+  "project_info": {
+    "project_number": "688136540466",
+    "project_id": "hitagyana-clg-finder",
+    "storage_bucket": "hitagyana-clg-finder.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:688136540466:android:d6e2e8e6e5f5e7e531872b",
+        "android_client_info": {
+          "package_name": "com.hitagyana_college_finder.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBD55eE6WaEKP2Pxa7i3LntV-HGdzj9Xzc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+} 
