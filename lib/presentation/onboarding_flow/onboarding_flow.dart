@@ -93,16 +93,16 @@ class _OnboardingFlowState extends State<OnboardingFlow>
         curve: Curves.easeInOut,
       );
     } else {
-      _navigateToCollegeSearch();
+      _navigateToLogin();
     }
   }
 
   void _skipOnboarding() {
-    _navigateToCollegeSearch();
+    _navigateToLogin();
   }
 
-  void _navigateToCollegeSearch() {
-    Navigator.pushReplacementNamed(context, '/college-search-dashboard');
+  void _navigateToLogin() {
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../core/app_export.dart';
-import '../../data/services/local_auth_service.dart';
+import '../../data/services/firebase_auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -12,7 +13,8 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -21,32 +23,43 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   bool _rememberMe = false;
 
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
   @override
   void initState() {
     super.initState();
-    _loadRememberedCredentials();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOut,
+    ));
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.5),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _animationController.forward();
   }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _animationController.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadRememberedCredentials() async {
-    final rememberMe = await LocalAuthService.instance.getRememberMe();
-    if (rememberMe) {
-      final credentials =
-          await LocalAuthService.instance.getRememberedCredentials();
-      if (credentials != null) {
-        setState(() {
-          _emailController.text = credentials['email'] ?? '';
-          _passwordController.text = credentials['password'] ?? '';
-          _rememberMe = true;
-        });
-      }
-    }
   }
 
   Future<void> _login() async {
@@ -57,31 +70,22 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final success = await LocalAuthService.instance.login(
-        _emailController.text.trim(),
-        _passwordController.text,
+      await FirebaseAuthService.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
       );
 
-      if (success) {
-        // Save remember me preference
-        await LocalAuthService.instance.setRememberMe(
-          _rememberMe,
-          _rememberMe ? _emailController.text.trim() : null,
-          _rememberMe ? _passwordController.text : null,
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/college-search-dashboard');
+      }
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message ?? 'Login failed'),
+            backgroundColor: AppTheme.lightTheme.colorScheme.error,
+          ),
         );
-
-        if (mounted) {
-          Navigator.pushReplacementNamed(context, '/college-search-dashboard');
-        }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Invalid email or password'),
-              backgroundColor: AppTheme.lightTheme.colorScheme.error,
-            ),
-          );
-        }
       }
     } catch (e) {
       if (mounted) {
@@ -101,37 +105,37 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _navigateToPhoneAuth() {
+    Navigator.pushNamed(context, '/phone-auth');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.light,
-        child: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                AppTheme.lightTheme.primaryColor,
-                AppTheme.lightTheme.primaryColor.withValues(alpha: 0.8),
-              ],
-            ),
-          ),
-          child: SafeArea(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(6.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 8.h),
-                  _buildHeader(),
-                  SizedBox(height: 6.h),
-                  _buildLoginForm(),
-                  SizedBox(height: 4.h),
-                  _buildFooter(),
-                ],
+      backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: 6.w),
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _buildHeader(),
+                    SizedBox(height: 6.h),
+                    _buildLoginForm(),
+                    SizedBox(height: 3.h),
+                    _buildDivider(),
+                    SizedBox(height: 3.h),
+                    _buildPhoneAuthButton(),
+                    SizedBox(height: 3.h),
+                    _buildRegisterLink(),
+                  ],
+                ),
               ),
             ),
           ),
@@ -142,20 +146,36 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildHeader() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Hero(
+          tag: 'app_logo',
+          child: Container(
+            width: 25.w,
+            height: 25.w,
+            decoration: BoxDecoration(
+              color: AppTheme.lightTheme.primaryColor.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.school,
+              size: 15.w,
+              color: AppTheme.lightTheme.primaryColor,
+            ),
+          ),
+        ),
+        SizedBox(height: 2.h),
         Text(
-          'Welcome Back!',
-          style: AppTheme.lightTheme.textTheme.headlineLarge?.copyWith(
-            color: Colors.white,
+          "Welcome Back!",
+          style: AppTheme.lightTheme.textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
+            color: AppTheme.lightTheme.primaryColor,
           ),
         ),
         SizedBox(height: 1.h),
         Text(
-          'Sign in to continue your college search journey',
+          "Sign in to continue your journey",
           style: AppTheme.lightTheme.textTheme.bodyLarge?.copyWith(
-            color: Colors.white.withValues(alpha: 0.8),
+            color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
           ),
         ),
       ],
@@ -163,45 +183,18 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildLoginForm() {
-    return Container(
-      padding: EdgeInsets.all(6.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: Offset(0, 5),
-          ),
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          _buildEmailField(),
+          SizedBox(height: 2.h),
+          _buildPasswordField(),
+          SizedBox(height: 2.h),
+          _buildRememberMeAndForgotPassword(),
+          SizedBox(height: 3.h),
+          _buildLoginButton(),
         ],
-      ),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Login to your account',
-              style: AppTheme.lightTheme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 4.h),
-            _buildEmailField(),
-            SizedBox(height: 3.h),
-            _buildPasswordField(),
-            SizedBox(height: 2.h),
-            _buildRememberMeAndForgotPassword(),
-            SizedBox(height: 4.h),
-            _buildLoginButton(),
-            SizedBox(height: 3.h),
-            _buildDivider(),
-            SizedBox(height: 3.h),
-            _buildDemoCredentials(),
-          ],
-        ),
       ),
     );
   }
@@ -217,9 +210,6 @@ class _LoginScreenState extends State<LoginScreen> {
           iconName: 'email',
           size: 20,
           color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
         ),
       ),
       validator: (value) {
@@ -258,9 +248,6 @@ class _LoginScreenState extends State<LoginScreen> {
             color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
           ),
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
@@ -277,32 +264,41 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildRememberMeAndForgotPassword() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           children: [
-            Checkbox(
-              value: _rememberMe,
-              onChanged: (value) {
-                setState(() {
-                  _rememberMe = value ?? false;
-                });
-              },
+            SizedBox(
+              height: 24,
+              width: 24,
+              child: Checkbox(
+                value: _rememberMe,
+                onChanged: (value) {
+                  setState(() {
+                    _rememberMe = value ?? false;
+                  });
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
             ),
+            SizedBox(width: 2.w),
             Text(
               'Remember me',
               style: AppTheme.lightTheme.textTheme.bodyMedium,
             ),
           ],
         ),
+        const Spacer(),
         TextButton(
           onPressed: () {
-            Navigator.pushNamed(context, '/forgot-password');
+            // TODO: Implement forgot password
           },
           child: Text(
             'Forgot Password?',
             style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
               color: AppTheme.lightTheme.primaryColor,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
@@ -311,32 +307,33 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildLoginButton() {
-    return ElevatedButton(
-      onPressed: _isLoading ? null : _login,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppTheme.lightTheme.primaryColor,
-        foregroundColor: Colors.white,
-        padding: EdgeInsets.symmetric(vertical: 2.h),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+    return SizedBox(
+      width: double.infinity,
+      height: 6.h,
+      child: ElevatedButton(
+        onPressed: _isLoading ? null : _login,
+        style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
+        child: _isLoading
+            ? SizedBox(
+                height: 3.h,
+                width: 3.h,
+                child: CircularProgressIndicator(
+                  color: AppTheme.lightTheme.colorScheme.onPrimary,
+                  strokeWidth: 2,
+                ),
+              )
+            : Text(
+                'Login with Email',
+                style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+                  color: AppTheme.lightTheme.colorScheme.onPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
       ),
-      child: _isLoading
-          ? SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.white,
-              ),
-            )
-          : Text(
-              'Login',
-              style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
     );
   }
 
@@ -345,82 +342,69 @@ class _LoginScreenState extends State<LoginScreen> {
       children: [
         Expanded(
           child: Divider(
-            color: AppTheme.lightTheme.colorScheme.outline,
+            color: AppTheme.lightTheme.colorScheme.outline.withOpacity(0.3),
           ),
         ),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 4.w),
           child: Text(
             'OR',
-            style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+            style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
               color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
             ),
           ),
         ),
         Expanded(
           child: Divider(
-            color: AppTheme.lightTheme.colorScheme.outline,
+            color: AppTheme.lightTheme.colorScheme.outline.withOpacity(0.3),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildDemoCredentials() {
-    return Container(
-      padding: EdgeInsets.all(4.w),
-      decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: AppTheme.lightTheme.colorScheme.outline.withValues(alpha: 0.2),
+  Widget _buildPhoneAuthButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 6.h,
+      child: OutlinedButton.icon(
+        onPressed: _navigateToPhoneAuth,
+        style: OutlinedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Demo Credentials:',
-            style: AppTheme.lightTheme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+        icon: Icon(
+          Icons.phone,
+          size: 20,
+          color: AppTheme.lightTheme.primaryColor,
+        ),
+        label: Text(
+          'Continue with Phone',
+          style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
           ),
-          SizedBox(height: 1.h),
-          Text(
-            'Email: demo@hitagyana.com',
-            style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-              fontFamily: 'monospace',
-            ),
-          ),
-          Text(
-            'Password: demo123',
-            style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-              fontFamily: 'monospace',
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildFooter() {
+  Widget _buildRegisterLink() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
           "Don't have an account? ",
-          style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-            color: Colors.white.withValues(alpha: 0.8),
-          ),
+          style: AppTheme.lightTheme.textTheme.bodyMedium,
         ),
         TextButton(
           onPressed: () {
-            Navigator.pushNamed(context, '/register');
+            Navigator.pushReplacementNamed(context, '/register');
           },
           child: Text(
-            'Sign Up',
+            'Register',
             style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
-              color: Colors.white,
+              color: AppTheme.lightTheme.primaryColor,
               fontWeight: FontWeight.w600,
             ),
           ),

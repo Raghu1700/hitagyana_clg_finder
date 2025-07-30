@@ -6,7 +6,6 @@ import 'package:sizer/sizer.dart';
 import '../core/app_export.dart';
 import '../widgets/custom_error_widget.dart';
 import 'data/services/firebase_college_service.dart';
-import 'data/services/local_auth_service.dart';
 import 'firebase_options.dart';
 import 'routes/app_routes.dart';
 
@@ -24,9 +23,6 @@ Future<void> main() async {
     // TEMPORARY: Clear existing college data to allow for re-seeding
     await collegeService.clearCollegesCollection();
     await collegeService.initializeCollegesCollection();
-
-    // Initialize local services
-    await LocalAuthService.instance.init();
 
     // Set preferred orientations
     SystemChrome.setPreferredOrientations([
