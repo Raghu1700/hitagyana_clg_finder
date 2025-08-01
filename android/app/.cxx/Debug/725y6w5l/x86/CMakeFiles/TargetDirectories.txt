@@ -1,0 +1,2 @@
+C:/Users/raghu/Downloads/majaapp/hitagyana_college_finder/android/app/.cxx/Debug/725y6w5l/x86/CMakeFiles/edit_cache.dir
+C:/Users/raghu/Downloads/majaapp/hitagyana_college_finder/android/app/.cxx/Debug/725y6w5l/x86/CMakeFiles/rebuild_cache.dir
