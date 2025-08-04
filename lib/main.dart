@@ -1,37 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../core/app_export.dart';
-import '../widgets/custom_error_widget.dart';
 
 import 'routes/app_routes.dart';
 import 'services/firebase_service.dart';
+import 'services/auth_service.dart';
+import 'presentation/auth/simple_auth_screen.dart';
+import 'presentation/saved_colleges_screen/saved_colleges_screen.dart';
+import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 🚨 CRITICAL: Custom error handling - DO NOT REMOVE
-  ErrorWidget.builder = (FlutterErrorDetails details) {
-    return CustomErrorWidget(
-      errorDetails: details,
-    );
-  };
-
-  // Initialize Firebase first
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await FirebaseService.initialize();
   print('Firebase initialized successfully');
-
-  // 🚨 ONE-TIME DATA POPULATION - Add colleges to Firebase
   await populateFirebaseWithColleges();
-
-  // Clear old saved colleges to ensure fresh start
   await clearOldSavedColleges();
-
-  // 🚨 CRITICAL: Device orientation lock - DO NOT REMOVE
-  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-
   runApp(const MyApp());
 }
 
@@ -224,7 +210,7 @@ Future<void> populateFirebaseWithColleges() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -232,10 +218,38 @@ class MyApp extends StatelessWidget {
       builder: (context, orientation, deviceType) {
         return MaterialApp(
           title: 'Hitagyana College Finder',
+          theme: AppTheme.lightTheme,
           debugShowCheckedModeBanner: false,
-          initialRoute: AppRoutes.initial,
+          home:
+              const AuthenticationWrapper(), // Direct to authentication wrapper
           routes: AppRoutes.routes,
         );
+      },
+    );
+  }
+}
+
+class AuthenticationWrapper extends StatelessWidget {
+  const AuthenticationWrapper({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasData && snapshot.data != null) {
+          // User is signed in, go to saved colleges page (main page)
+          return const SavedCollegesScreen();
+        } else {
+          // User is not signed in, go to auth screen
+          return const SimpleAuthScreen();
+        }
       },
     );
   }

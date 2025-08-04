@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sizer/sizer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/app_export.dart';
 
@@ -12,12 +13,92 @@ class LocationSectionWidget extends StatelessWidget {
     required this.location,
   }) : super(key: key);
 
-  void _getDirections() {
-    Fluttertoast.showToast(
-      msg: "Opening directions in maps app...",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-    );
+  void _getDirections() async {
+    try {
+      final latitude = location['latitude']?.toString() ?? '';
+      final longitude = location['longitude']?.toString() ?? '';
+      final address = location['address']?.toString() ?? '';
+
+      Uri mapsUrl;
+      if (latitude.isNotEmpty && longitude.isNotEmpty) {
+        // Use coordinates for more accurate directions
+        mapsUrl = Uri.parse(
+            'https://www.google.com/maps/dir/?api=1&destination=$latitude,$longitude');
+      } else if (address.isNotEmpty) {
+        // Use address if coordinates not available
+        final encodedAddress = Uri.encodeComponent(address);
+        mapsUrl = Uri.parse(
+            'https://www.google.com/maps/dir/?api=1&destination=$encodedAddress');
+      } else {
+        Fluttertoast.showToast(
+          msg: "Location details not available",
+          backgroundColor: Colors.orange,
+        );
+        return;
+      }
+
+      if (await canLaunchUrl(mapsUrl)) {
+        await launchUrl(mapsUrl, mode: LaunchMode.externalApplication);
+        Fluttertoast.showToast(
+          msg: "Opening directions in maps...",
+          backgroundColor: AppTheme.byzantium,
+        );
+      } else {
+        Fluttertoast.showToast(
+          msg: "Could not open maps",
+          backgroundColor: Colors.red,
+        );
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "Error opening maps: $e",
+        backgroundColor: Colors.red,
+      );
+    }
+  }
+
+  void _openInMaps() async {
+    try {
+      final latitude = location['latitude']?.toString() ?? '';
+      final longitude = location['longitude']?.toString() ?? '';
+      final address = location['address']?.toString() ?? '';
+
+      Uri mapsUrl;
+      if (latitude.isNotEmpty && longitude.isNotEmpty) {
+        // Use coordinates if available
+        mapsUrl = Uri.parse(
+            'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude');
+      } else if (address.isNotEmpty) {
+        // Use address if coordinates not available
+        final encodedAddress = Uri.encodeComponent(address);
+        mapsUrl = Uri.parse(
+            'https://www.google.com/maps/search/?api=1&query=$encodedAddress');
+      } else {
+        Fluttertoast.showToast(
+          msg: "Location details not available",
+          backgroundColor: Colors.orange,
+        );
+        return;
+      }
+
+      if (await canLaunchUrl(mapsUrl)) {
+        await launchUrl(mapsUrl, mode: LaunchMode.externalApplication);
+        Fluttertoast.showToast(
+          msg: "Opening location in maps...",
+          backgroundColor: AppTheme.byzantium,
+        );
+      } else {
+        Fluttertoast.showToast(
+          msg: "Could not open maps",
+          backgroundColor: Colors.red,
+        );
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "Error opening maps: $e",
+        backgroundColor: Colors.red,
+      );
+    }
   }
 
   @override
@@ -60,78 +141,100 @@ class LocationSectionWidget extends StatelessWidget {
           ),
 
           // Map Placeholder
-          Container(
-            height: 25.h,
-            margin: EdgeInsets.symmetric(horizontal: 4.w),
-            decoration: BoxDecoration(
-              color: AppTheme.lightTheme.colorScheme.primary
-                  .withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppTheme.lightTheme.colorScheme.outline
-                    .withValues(alpha: 0.3),
+          GestureDetector(
+            onTap: _openInMaps,
+            child: Container(
+              height: 25.h,
+              margin: EdgeInsets.symmetric(horizontal: 4.w),
+              decoration: BoxDecoration(
+                color: AppTheme.lightTheme.colorScheme.primary
+                    .withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppTheme.lightTheme.colorScheme.outline
+                      .withValues(alpha: 0.3),
+                ),
               ),
-            ),
-            child: Stack(
-              children: [
-                // Map Background Pattern
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    image: DecorationImage(
-                      image: NetworkImage(
-                        "https://images.pexels.com/photos/2662116/pexels-photo-2662116.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-                      ),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-
-                // Overlay
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: AppTheme.lightTheme.colorScheme.primary
-                        .withValues(alpha: 0.3),
-                  ),
-                ),
-
-                // Center Marker
-                Center(
-                  child: Container(
-                    padding: EdgeInsets.all(3.w),
+              child: Stack(
+                children: [
+                  // Map Background Pattern
+                  Container(
                     decoration: BoxDecoration(
-                      color: AppTheme.lightTheme.colorScheme.error,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.3),
-                          blurRadius: 8,
-                          offset: Offset(0, 2),
+                      borderRadius: BorderRadius.circular(12),
+                      image: DecorationImage(
+                        image: NetworkImage(
+                          "https://images.pexels.com/photos/2662116/pexels-photo-2662116.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
                         ),
-                      ],
-                    ),
-                    child: CustomIconWidget(
-                      iconName: 'location_on',
-                      color: Colors.white,
-                      size: 24,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
-                ),
 
-                // Zoom Controls
-                Positioned(
-                  right: 3.w,
-                  top: 3.w,
-                  child: Column(
-                    children: [
-                      _buildZoomButton(Icons.add, () {}),
-                      SizedBox(height: 1.h),
-                      _buildZoomButton(Icons.remove, () {}),
-                    ],
+                  // Overlay
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: AppTheme.lightTheme.colorScheme.primary
+                          .withValues(alpha: 0.3),
+                    ),
                   ),
-                ),
-              ],
+
+                  // Center Marker
+                  Center(
+                    child: Container(
+                      padding: EdgeInsets.all(3.w),
+                      decoration: BoxDecoration(
+                        color: AppTheme.lightTheme.colorScheme.error,
+                        borderRadius: BorderRadius.circular(50),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.lightTheme.colorScheme.shadow,
+                            blurRadius: 8,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.location_on,
+                        color: Colors.white,
+                        size: 8.w,
+                      ),
+                    ),
+                  ),
+
+                  // Tap to open indicator
+                  Positioned(
+                    top: 2.w,
+                    right: 2.w,
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.touch_app,
+                            color: Colors.white,
+                            size: 4.w,
+                          ),
+                          SizedBox(width: 1.w),
+                          Text(
+                            'Tap to open',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10.sp,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
 

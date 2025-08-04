@@ -228,7 +228,7 @@ class ClassCardWidget extends StatelessWidget {
           ElevatedButton(
             onPressed: onEnroll,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.getSuccessColor(true),
+              backgroundColor: AppTheme.byzantium,
               padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
             ),
             child: const Text('Continue Learning'),

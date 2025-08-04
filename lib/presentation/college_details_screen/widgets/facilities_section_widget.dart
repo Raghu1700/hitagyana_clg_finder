@@ -117,7 +117,7 @@ class FacilitiesSectionWidget extends StatelessWidget {
     required String description,
   }) {
     return Container(
-      padding: EdgeInsets.all(3.w),
+      padding: EdgeInsets.all(2.5.w),
       decoration: BoxDecoration(
         color: AppTheme.lightTheme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
@@ -129,7 +129,7 @@ class FacilitiesSectionWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: EdgeInsets.all(3.w),
+            padding: EdgeInsets.all(2.5.w),
             decoration: BoxDecoration(
               color: AppTheme.lightTheme.colorScheme.primary
                   .withValues(alpha: 0.1),
@@ -138,21 +138,26 @@ class FacilitiesSectionWidget extends StatelessWidget {
             child: CustomIconWidget(
               iconName: icon,
               color: AppTheme.lightTheme.colorScheme.primary,
-              size: 28,
+              size: 24,
             ),
           ),
-          SizedBox(height: 2.h),
+          SizedBox(height: 1.h),
           Text(
             name,
             style: AppTheme.lightTheme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
+              fontSize: 12.sp,
             ),
             textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          SizedBox(height: 1.h),
+          SizedBox(height: 0.5.h),
           Text(
             description,
-            style: AppTheme.lightTheme.textTheme.bodySmall,
+            style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+              fontSize: 9.sp,
+            ),
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,

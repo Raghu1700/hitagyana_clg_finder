@@ -62,7 +62,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Account created successfully!'),
-              backgroundColor: AppTheme.getSuccessColor(true),
+              backgroundColor: AppTheme.byzantium,
             ),
           );
           Navigator.pushReplacementNamed(context, '/college-search-dashboard');

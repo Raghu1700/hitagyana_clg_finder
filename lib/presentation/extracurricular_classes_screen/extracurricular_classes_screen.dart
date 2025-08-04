@@ -559,7 +559,7 @@ class _ExtracurricularClassesScreenState
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Enrolled in ${classData['title']}'),
-        backgroundColor: AppTheme.getSuccessColor(true),
+        backgroundColor: AppTheme.byzantium,
       ),
     );
   }

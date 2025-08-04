@@ -153,7 +153,7 @@ class _FeesSectionWidgetState extends State<FeesSectionWidget> {
                   currency: hostelFee['currency'],
                   period: hostelFee['period'],
                   icon: 'hotel',
-                  color: AppTheme.getAccentColor(true),
+                  color: AppTheme.lavenderPink,
                 ),
               ],
             ),

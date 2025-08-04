@@ -26,86 +26,90 @@ class _CollegeDetailsScreenState extends State<CollegeDetailsScreen>
   bool _isLoading = false;
   late TabController _tabController;
 
-  // Mock college data
-  final Map<String, dynamic> collegeData = {
-    "id": 1,
-    "name": "Indian Institute of Technology Delhi",
-    "shortName": "IIT Delhi",
-    "images": [
-      "https://images.pexels.com/photos/207692/pexels-photo-207692.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-      "https://images.pexels.com/photos/1454360/pexels-photo-1454360.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-      "https://images.pexels.com/photos/159490/yale-university-landscape-universities-schools-159490.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-    ],
-    "description":
-        "IIT Delhi is one of the premier engineering institutions in India, known for its excellence in technical education and research. Established in 1961, it has consistently ranked among the top engineering colleges globally.",
-    "establishmentYear": 1961,
-    "accreditation": "NAAC A++, NBA Accredited",
-    "location": {
-      "address": "Hauz Khas, New Delhi, Delhi 110016",
-      "city": "New Delhi",
-      "state": "Delhi",
-      "latitude": 28.5449,
-      "longitude": 77.1928
-    },
-    "fees": {
-      "tuition": {"amount": 200000, "currency": "₹", "period": "per year"},
-      "college": {"amount": 25000, "currency": "₹", "period": "per year"},
-      "hostel": {"amount": 15000, "currency": "₹", "period": "per year"}
-    },
-    "facilities": [
-      {
-        "name": "Library",
-        "icon": "library_books",
-        "description": "24/7 Digital Library"
+  // Get college data from route arguments
+  Map<String, dynamic> get collegeData {
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args != null && args is Map<String, dynamic>) {
+      return args;
+    }
+    // Fallback to mock data if no arguments provided
+    return {
+      "id": 1,
+      "name": "Indian Institute of Technology Delhi",
+      "shortName": "IIT Delhi",
+      "website": "https://www.iitd.ac.in",
+      "contact": {"phone": "+91-11-2659-1000", "email": "info@iitd.ac.in"},
+      "location": {
+        "address": "Hauz Khas, New Delhi, Delhi 110016",
+        "city": "New Delhi",
+        "state": "Delhi",
+        "latitude": 28.5449,
+        "longitude": 77.1928
       },
-      {
-        "name": "Hostel",
-        "icon": "hotel",
-        "description": "On-campus accommodation"
+      "images": [
+        "https://images.pexels.com/photos/207692/pexels-photo-207692.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+        "https://images.pexels.com/photos/1454360/pexels-photo-1454360.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+      ],
+      "description":
+          "IIT Delhi is one of the premier engineering institutions in India.",
+      "establishmentYear": 1961,
+      "accreditation": "NAAC A++, NBA Accredited",
+      "ranking": 2,
+      "fees": {
+        "tuition": {"amount": 200000, "currency": "₹", "period": "per year"},
+        "college": {"amount": 25000, "currency": "₹", "period": "per year"},
+        "hostel": {"amount": 15000, "currency": "₹", "period": "per year"}
       },
-      {
-        "name": "Sports",
-        "icon": "sports_tennis",
-        "description": "Multiple sports facilities"
-      },
-      {
-        "name": "Labs",
-        "icon": "science",
-        "description": "State-of-the-art laboratories"
-      },
-      {"name": "WiFi", "icon": "wifi", "description": "High-speed internet"},
-      {
-        "name": "Cafeteria",
-        "icon": "restaurant",
-        "description": "Multi-cuisine dining"
-      }
-    ],
-    "courses": [
-      {
-        "name": "Computer Science Engineering",
-        "type": "undergraduate",
-        "duration": "4 years",
-        "seats": 120
-      },
-      {
-        "name": "Mechanical Engineering",
-        "type": "undergraduate",
-        "duration": "4 years",
-        "seats": 100
-      },
-      {
-        "name": "M.Tech Computer Science",
-        "type": "graduate",
-        "duration": "2 years",
-        "seats": 60
-      },
-      {"name": "MBA", "type": "graduate", "duration": "2 years", "seats": 80}
-    ],
-    "website": "https://www.iitd.ac.in",
-    "contact": {"phone": "+91-11-2659-1000", "email": "info@iitd.ac.in"},
-    "rank": 2,
-    "lastUpdated": "2025-07-15"
-  };
+      "facilities": [
+        {
+          "name": "Library",
+          "icon": "library_books",
+          "description": "24/7 Digital Library"
+        },
+        {
+          "name": "Hostel",
+          "icon": "hotel",
+          "description": "On-campus accommodation"
+        },
+        {
+          "name": "Sports",
+          "icon": "sports_tennis",
+          "description": "Multiple sports facilities"
+        },
+        {
+          "name": "Labs",
+          "icon": "science",
+          "description": "State-of-the-art laboratories"
+        },
+        {"name": "WiFi", "icon": "wifi", "description": "High-speed internet"},
+        {
+          "name": "Cafeteria",
+          "icon": "restaurant",
+          "description": "Multi-cuisine dining"
+        }
+      ],
+      "courses": [
+        {
+          "name": "Computer Science Engineering",
+          "type": "undergraduate",
+          "duration": "4 years",
+          "seats": 120
+        },
+        {
+          "name": "Mechanical Engineering",
+          "type": "undergraduate",
+          "duration": "4 years",
+          "seats": 100
+        },
+        {
+          "name": "M.Tech Computer Science",
+          "type": "graduate",
+          "duration": "2 years",
+          "seats": 60
+        }
+      ]
+    };
+  }
 
   @override
   void initState() {
@@ -136,7 +140,7 @@ class _CollegeDetailsScreenState extends State<CollegeDetailsScreen>
   void _shareCollege() {
     HapticFeedback.selectionClick();
     final String shareText =
-        "Check out ${collegeData['name']} - Rank #${collegeData['rank']} engineering college in India. Visit: ${collegeData['website']}";
+        "Check out ${collegeData['name']} - Rank #${collegeData['ranking']} engineering college in India. Visit: ${collegeData['website']}";
 
     // Mock share functionality
     Fluttertoast.showToast(
@@ -152,26 +156,155 @@ class _CollegeDetailsScreenState extends State<CollegeDetailsScreen>
     });
 
     try {
-      final Uri url = Uri.parse(collegeData['website']);
+      final website = collegeData['website']?.toString() ?? '';
+      if (website.isEmpty) {
+        Fluttertoast.showToast(
+          msg: "Website not available",
+          backgroundColor: Colors.orange,
+        );
+        return;
+      }
+
+      final Uri url = Uri.parse(website);
       if (await canLaunchUrl(url)) {
         await launchUrl(url, mode: LaunchMode.externalApplication);
+        Fluttertoast.showToast(
+          msg: "Opening website...",
+          backgroundColor: AppTheme.byzantium,
+        );
       } else {
         Fluttertoast.showToast(
           msg: "Could not open website",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
         );
       }
     } catch (e) {
       Fluttertoast.showToast(
-        msg: "Error opening website",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
+        msg: "Error opening website: $e",
+        backgroundColor: Colors.red,
       );
     } finally {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  void _makePhoneCall() async {
+    try {
+      final phone = collegeData['contact']?['phone']?.toString() ?? '';
+      if (phone.isEmpty) {
+        Fluttertoast.showToast(
+          msg: "Phone number not available",
+          backgroundColor: Colors.orange,
+        );
+        return;
+      }
+
+      final Uri phoneUrl = Uri.parse('tel:$phone');
+      if (await canLaunchUrl(phoneUrl)) {
+        await launchUrl(phoneUrl);
+        Fluttertoast.showToast(
+          msg: "Opening phone app...",
+          backgroundColor: AppTheme.byzantium,
+        );
+      } else {
+        Fluttertoast.showToast(
+          msg: "Could not make phone call",
+          backgroundColor: Colors.red,
+        );
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "Error making phone call: $e",
+        backgroundColor: Colors.red,
+      );
+    }
+  }
+
+  void _sendEmail() async {
+    try {
+      final email = collegeData['contact']?['email']?.toString() ?? '';
+      if (email.isEmpty) {
+        Fluttertoast.showToast(
+          msg: "Email not available",
+          backgroundColor: Colors.orange,
+        );
+        return;
+      }
+
+      final Uri emailUrl = Uri.parse(
+          'mailto:$email?subject=Inquiry about ${collegeData['shortName'] ?? collegeData['name']}');
+      if (await canLaunchUrl(emailUrl)) {
+        await launchUrl(emailUrl);
+        Fluttertoast.showToast(
+          msg: "Opening email app...",
+          backgroundColor: AppTheme.byzantium,
+        );
+      } else {
+        Fluttertoast.showToast(
+          msg: "Could not open email app",
+          backgroundColor: Colors.red,
+        );
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "Error opening email: $e",
+        backgroundColor: Colors.red,
+      );
+    }
+  }
+
+  void _openMaps() async {
+    try {
+      final location = collegeData['location'];
+      if (location == null) {
+        Fluttertoast.showToast(
+          msg: "Location not available",
+          backgroundColor: Colors.orange,
+        );
+        return;
+      }
+
+      final latitude = location['latitude']?.toString() ?? '';
+      final longitude = location['longitude']?.toString() ?? '';
+      final address = location['address']?.toString() ?? '';
+
+      Uri mapsUrl;
+      if (latitude.isNotEmpty && longitude.isNotEmpty) {
+        // Use coordinates if available
+        mapsUrl = Uri.parse(
+            'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude');
+      } else if (address.isNotEmpty) {
+        // Use address if coordinates not available
+        final encodedAddress = Uri.encodeComponent(address);
+        mapsUrl = Uri.parse(
+            'https://www.google.com/maps/search/?api=1&query=$encodedAddress');
+      } else {
+        Fluttertoast.showToast(
+          msg: "Location details not available",
+          backgroundColor: Colors.orange,
+        );
+        return;
+      }
+
+      if (await canLaunchUrl(mapsUrl)) {
+        await launchUrl(mapsUrl, mode: LaunchMode.externalApplication);
+        Fluttertoast.showToast(
+          msg: "Opening maps...",
+          backgroundColor: AppTheme.byzantium,
+        );
+      } else {
+        Fluttertoast.showToast(
+          msg: "Could not open maps",
+          backgroundColor: Colors.red,
+        );
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "Error opening maps: $e",
+        backgroundColor: Colors.red,
+      );
     }
   }
 
@@ -210,7 +343,7 @@ class _CollegeDetailsScreenState extends State<CollegeDetailsScreen>
               subtitle: Text(collegeData['contact']['phone']),
               onTap: () {
                 Navigator.pop(context);
-                Fluttertoast.showToast(msg: "Calling college...");
+                _makePhoneCall();
               },
             ),
             ListTile(
@@ -223,7 +356,7 @@ class _CollegeDetailsScreenState extends State<CollegeDetailsScreen>
               subtitle: Text(collegeData['contact']['email']),
               onTap: () {
                 Navigator.pop(context);
-                Fluttertoast.showToast(msg: "Opening email app...");
+                _sendEmail();
               },
             ),
             SizedBox(height: 2.h),
@@ -298,7 +431,7 @@ class _CollegeDetailsScreenState extends State<CollegeDetailsScreen>
                   description: collegeData['description'],
                   establishmentYear: collegeData['establishmentYear'],
                   accreditation: collegeData['accreditation'],
-                  rank: collegeData['rank'],
+                  rank: collegeData['ranking'],
                 ),
               ),
 
