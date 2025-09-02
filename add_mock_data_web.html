@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Mock College Data</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <h1>Add Mock College Data to Firestore</h1>
+    <button onclick="addMockData()">Add Mock Data</button>
+    <div id="status"></div>
+
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBD55eE6WaEKP2Pxa7i3LntV-HGdzj9Xzc",
+            authDomain: "hitagyana-clg-finder.firebaseapp.com",
+            projectId: "hitagyana-clg-finder",
+            storageBucket: "hitagyana-clg-finder.firebasestorage.app",
+            messagingSenderId: "688136540466",
+            appId: "1:688136540466:web:cdac5d71e268de1031872b",
+            measurementId: "G-TL9YRXH0V7"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Mock college data
+        const mockColleges = [
+            {
+                id: 'iit-delhi',
+                name: 'Indian Institute of Technology Delhi',
+                shortName: 'IIT Delhi',
+                location: 'New Delhi, Delhi',
+                ranking: 2,
+                logo: 'https://upload.wikimedia.org/wikipedia/en/f/fd/Indian_Institute_of_Technology_Delhi_Logo.svg',
+                tuitionFee: '₹2,50,000',
+                collegeFee: '₹50,000',
+                hostelFee: '₹75,000',
+                totalFee: '₹3,75,000',
+                courses: [
+                    'Computer Science & Engineering',
+                    'Mechanical Engineering', 
+                    'Electrical Engineering',
+                    'Civil Engineering',
+                    'Chemical Engineering'
+                ],
+                rating: 4.8,
+                reviewCount: 1250,
+                website: 'https://www.iitd.ac.in',
+                established: 1961,
+                type: 'Government',
+                accreditation: 'NAAC A++',
+                campusSize: '320 acres',
+                studentCount: 8500,
+                facultyCount: 450,
+                placementRate: '95%',
+                averagePackage: '₹18,00,000',
+                facilities: [
+                    'Library',
+                    'Hostels', 
+                    'Sports Complex',
+                    'Medical Center',
+                    'Wi-Fi Campus'
+                ],
+                admissions: {
+                    entrance: 'JEE Advanced',
+                    cutoff: 'Top Ranks',
+                    applicationDeadline: 'June 15, 2024'
+                },
+                contact: {
+                    email: 'info@iitd.ac.in',
+                    phone: '+91-11-26597000'
+                },
+                description: 'One of India\'s premier technological institutions, known for excellence in engineering and research.',
+                images: [
+                    'https://images.unsplash.com/photo-1562774053-701939374585?w=800&h=600&fit=crop',
+                    'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&h=600&fit=crop'
+                ]
+            },
+            {
+                id: 'aiims-delhi',
+                name: 'All India Institute of Medical Sciences',
+                shortName: 'AIIMS Delhi', 
+                location: 'New Delhi, Delhi',
+                ranking: 1,
+                logo: 'https://upload.wikimedia.org/wikipedia/en/b/bb/All_India_Institute_of_Medical_Sciences%2C_New_Delhi_logo.png',
+                tuitionFee: '₹1,00,000',
+                collegeFee: '₹25,000', 
+                hostelFee: '₹50,000',
+                totalFee: '₹1,75,000',
+                courses: [
+                    'Medicine',
+                    'Surgery', 
+                    'Nursing',
+                    'Medical Research',
+                    'Allied Health Sciences'
+                ],
+                rating: 4.9,
+                reviewCount: 850,
+                website: 'https://www.aiims.edu',
+                established: 1956,
+                type: 'Government',
+                accreditation: 'NAAC A++',
+                campusSize: '200 acres',
+                studentCount: 5000,
+                facultyCount: 800,
+                placementRate: '100%',
+                averagePackage: '₹20,00,000',
+                facilities: [
+                    'Hospital',
+                    'Research Labs',
+                    'Library', 
+                    'Sports Complex',
+                    'Medical Museum'
+                ],
+                admissions: {
+                    entrance: 'NEET',
+                    cutoff: 'Top Ranks', 
+                    applicationDeadline: 'May 15, 2024'
+                },
+                contact: {
+                    email: 'info@aiims.edu',
+                    phone: '+91-11-26588500'
+                },
+                description: 'Premier medical institution of India with world-class healthcare and medical education.',
+                images: [
+                    'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=600&fit=crop',
+                    'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&h=600&fit=crop'
+                ]
+            }
+        ];
+
+        async function addMockData() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = '<p>🚀 Adding mock college data...</p>';
+            
+            try {
+                for (const college of mockColleges) {
+                    const { id, ...collegeData } = college;
+                    await db.collection('colleges').doc(id).set(collegeData);
+                    statusDiv.innerHTML += `<p>✅ Added: ${college.name}</p>`;
+                }
+                
+                statusDiv.innerHTML += '<p>🎉 Successfully added all mock college data!</p>';
+                statusDiv.innerHTML += '<p>📱 Now hot reload your Flutter app to see the data</p>';
+                
+            } catch (error) {
+                statusDiv.innerHTML += `<p>❌ Error: ${error.message}</p>`;
+                console.error('Error adding mock data:', error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -86,7 +86,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('hasSeenOnboarding', true);
 
-    Navigator.pushReplacementNamed(context, '/college-search-dashboard');
+    Navigator.pushReplacementNamed(context, '/simple-auth-screen');
   }
 
   void _skipOnboarding() {
@@ -96,8 +96,12 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
-      body: SafeArea(
+      backgroundColor: AppTheme.almond,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppTheme.backgroundGradient,
+        ),
+        child: SafeArea(
         child: Column(
           children: [
             // Skip Button
@@ -111,7 +115,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                     'Skip',
                     style: TextStyle(
                       fontSize: 14.sp,
-                      color: AppTheme.lightTheme.primaryColor,
+                      color: AppTheme.byzantium,
                     ),
                   ),
                 ),
@@ -146,16 +150,18 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             SizedBox(height: 4.h),
           ],
         ),
+        ),
       ),
     );
   }
 
   Widget _buildOnboardingPage(Map<String, dynamic> data) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 6.w),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 6.w),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
           // Image
           Container(
             width: 80.w,
@@ -245,6 +251,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             textAlign: TextAlign.center,
           ),
         ],
+        ),
       ),
     );
   }
@@ -259,9 +266,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           width: _currentPage == index ? 8.w : 2.w,
           height: 2.w,
           decoration: BoxDecoration(
-            color: _currentPage == index
-                ? AppTheme.lightTheme.primaryColor
-                : AppTheme.lightTheme.colorScheme.outline,
+                      color: _currentPage == index
+              ? AppTheme.byzantium
+              : AppTheme.lightGray,
             borderRadius: BorderRadius.circular(1.w),
           ),
         ),
@@ -305,8 +312,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
           ElevatedButton(
             onPressed: _nextPage,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.lightTheme.primaryColor,
-              foregroundColor: AppTheme.lightTheme.colorScheme.onPrimary,
+              backgroundColor: AppTheme.byzantium,
+              foregroundColor: AppTheme.almond,
               padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),

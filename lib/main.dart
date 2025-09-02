@@ -9,6 +9,7 @@ import 'services/firebase_service.dart';
 import 'services/auth_service.dart';
 import 'presentation/auth/simple_auth_screen.dart';
 import 'presentation/saved_colleges_screen/saved_colleges_screen.dart';
+import 'presentation/onboarding_flow/onboarding_flow.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
@@ -29,8 +30,9 @@ Future<void> clearOldSavedColleges() async {
 
     if (!hasCleared) {
       await prefs.remove('savedColleges');
+      await prefs.remove('hasSeenOnboarding'); // Clear onboarding to show it again
       await prefs.setBool('hasCleared_v2', true);
-      print('🧹 Cleared old saved colleges data');
+      print('🧹 Cleared old saved colleges data and onboarding status');
     }
   } catch (e) {
     print('Error clearing old data: $e');
@@ -43,8 +45,11 @@ Future<void> populateFirebaseWithColleges() async {
     // Check if data already exists
     final existingColleges = await FirebaseService.getAllColleges();
     if (existingColleges.isNotEmpty) {
-      print('📚 Colleges already exist in database, skipping population');
-      return;
+      print('📚 Colleges already exist in database, clearing and adding fresh data');
+      // Clear existing data to add fresh colleges
+      for (var college in existingColleges) {
+        await FirebaseService.deleteCollege(college['id']);
+      }
     }
 
     print('🚀 Adding colleges to Firebase...');
@@ -202,6 +207,108 @@ Future<void> populateFirebaseWithColleges() async {
       ]
     });
 
+    // College 4: NIT Trichy
+    await FirebaseService.addCollege({
+      'name': 'National Institute of Technology Tiruchirappalli',
+      'shortName': 'NIT Trichy',
+      'location': 'Tiruchirappalli, Tamil Nadu',
+      'ranking': 5,
+      'logo': 'https://upload.wikimedia.org/wikipedia/en/8/8c/National_Institute_of_Technology%2C_Tiruchirappalli_logo.png',
+      'tuitionFee': '₹1,50,000',
+      'collegeFee': '₹30,000',
+      'hostelFee': '₹60,000',
+      'totalFee': '₹2,40,000',
+      'courses': [
+        'Computer Science & Engineering',
+        'Mechanical Engineering',
+        'Electrical & Electronics',
+        'Civil Engineering',
+        'Chemical Engineering',
+        'Information Technology'
+      ],
+      'rating': 4.6,
+      'reviewCount': 850,
+      'website': 'https://www.nitt.edu',
+      'established': 1964,
+      'type': 'Government',
+      'accreditation': 'NAAC A++',
+      'campusSize': '800 acres',
+      'studentCount': 6000,
+      'facultyCount': 350,
+      'placementRate': '92%',
+      'averagePackage': '₹12,00,000',
+      'facilities': [
+        'Central Library',
+        'Hostels',
+        'Sports Complex',
+        'Medical Center',
+        'Wi-Fi Campus',
+        'Research Labs'
+      ],
+      'admissions': {
+        'entrance': 'JEE Main',
+        'cutoff': 'Top 10,000 Ranks',
+        'applicationDeadline': 'June 30, 2024'
+      },
+      'contact': {'email': 'info@nitt.edu', 'phone': '+91-431-2503000'},
+      'description': 'Premier engineering institution known for excellence in technical education and research.',
+      'images': [
+        'https://images.unsplash.com/photo-1562774053-701939374585?w=800&h=600&fit=crop',
+        'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&h=600&fit=crop'
+      ]
+    });
+
+    // College 5: BITS Pilani
+    await FirebaseService.addCollege({
+      'name': 'Birla Institute of Technology and Science',
+      'shortName': 'BITS Pilani',
+      'location': 'Pilani, Rajasthan',
+      'ranking': 3,
+      'logo': 'https://upload.wikimedia.org/wikipedia/en/5/5c/BITS_Pilani_Logo.png',
+      'tuitionFee': '₹4,00,000',
+      'collegeFee': '₹1,00,000',
+      'hostelFee': '₹1,20,000',
+      'totalFee': '₹6,20,000',
+      'courses': [
+        'Computer Science',
+        'Mechanical Engineering',
+        'Electrical & Electronics',
+        'Chemical Engineering',
+        'Civil Engineering',
+        'Pharmacy'
+      ],
+      'rating': 4.7,
+      'reviewCount': 1200,
+      'website': 'https://www.bits-pilani.ac.in',
+      'established': 1964,
+      'type': 'Private',
+      'accreditation': 'NAAC A++',
+      'campusSize': '328 acres',
+      'studentCount': 4500,
+      'facultyCount': 400,
+      'placementRate': '98%',
+      'averagePackage': '₹15,00,000',
+      'facilities': [
+        'Central Library',
+        'Hostels',
+        'Sports Complex',
+        'Medical Center',
+        'Wi-Fi Campus',
+        'Innovation Center'
+      ],
+      'admissions': {
+        'entrance': 'BITSAT',
+        'cutoff': 'Top 15,000 Ranks',
+        'applicationDeadline': 'May 15, 2024'
+      },
+      'contact': {'email': 'info@bits-pilani.ac.in', 'phone': '+91-1596-242210'},
+      'description': 'Premier private engineering institution with world-class facilities and excellent placement records.',
+      'images': [
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=600&fit=crop',
+        'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=600&fit=crop'
+      ]
+    });
+
     print('✅ All colleges added successfully to Firebase!');
     print('🎉 Your app is now ready with college data!');
   } catch (e) {
@@ -234,23 +341,47 @@ class AuthenticationWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+    return FutureBuilder<bool>(
+      future: _checkOnboardingStatus(),
+      builder: (context, onboardingSnapshot) {
+        if (onboardingSnapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        if (snapshot.hasData && snapshot.data != null) {
-          // User is signed in, go to saved colleges page (main page)
-          return const SavedCollegesScreen();
-        } else {
-          // User is not signed in, go to auth screen
-          return const SimpleAuthScreen();
+        final hasSeenOnboarding = onboardingSnapshot.data ?? false;
+        
+        if (!hasSeenOnboarding) {
+          // Show onboarding for new users
+          return const OnboardingFlow();
         }
+
+        // Check authentication status for existing users
+        return StreamBuilder<User?>(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            if (snapshot.hasData && snapshot.data != null) {
+              // User is signed in, go to saved colleges page (main page)
+              return const SavedCollegesScreen();
+            } else {
+              // User is not signed in, go to auth screen
+              return const SimpleAuthScreen();
+            }
+          },
+        );
       },
     );
+  }
+
+  Future<bool> _checkOnboardingStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('hasSeenOnboarding') ?? false;
   }
 }

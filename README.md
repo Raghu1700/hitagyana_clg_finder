@@ -8,7 +8,7 @@
 
 ## 📱 Download APK
 
-**[Download Latest APK (v1.0.0)](./Hitagyana-College-Finder-v1.0.0.apk)** - 53MB
+**[Download Latest APK (Final Release)](./HitagyanaCollegeFinder_FINAL_Release_Jan2025.apk)** - 53MB
 
 > **Note**: Enable "Install from Unknown Sources" in your Android settings to install the APK.
 
@@ -67,9 +67,9 @@
    ```
 
 2. **Install dependencies**
-   ```bash
-   flutter pub get
-   ```
+```bash
+flutter pub get
+```
 
 3. **Firebase Setup**
    - Create a new Firebase project
@@ -78,9 +78,9 @@
    - Update Firebase configuration in the app
 
 4. **Run the app**
-   ```bash
-   flutter run
-   ```
+```bash
+flutter run
+```
 
 ## 🏗️ Architecture
 
