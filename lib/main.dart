@@ -10,6 +10,7 @@ import 'services/auth_service.dart';
 import 'presentation/auth/simple_auth_screen.dart';
 import 'presentation/saved_colleges_screen/saved_colleges_screen.dart';
 import 'presentation/onboarding_flow/onboarding_flow.dart';
+import 'presentation/main_navigation/main_navigation_wrapper.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
@@ -30,7 +31,8 @@ Future<void> clearOldSavedColleges() async {
 
     if (!hasCleared) {
       await prefs.remove('savedColleges');
-      await prefs.remove('hasSeenOnboarding'); // Clear onboarding to show it again
+      await prefs
+          .remove('hasSeenOnboarding'); // Clear onboarding to show it again
       await prefs.setBool('hasCleared_v2', true);
       print('🧹 Cleared old saved colleges data and onboarding status');
     }
@@ -45,7 +47,8 @@ Future<void> populateFirebaseWithColleges() async {
     // Check if data already exists
     final existingColleges = await FirebaseService.getAllColleges();
     if (existingColleges.isNotEmpty) {
-      print('📚 Colleges already exist in database, clearing and adding fresh data');
+      print(
+          '📚 Colleges already exist in database, clearing and adding fresh data');
       // Clear existing data to add fresh colleges
       for (var college in existingColleges) {
         await FirebaseService.deleteCollege(college['id']);
@@ -213,7 +216,8 @@ Future<void> populateFirebaseWithColleges() async {
       'shortName': 'NIT Trichy',
       'location': 'Tiruchirappalli, Tamil Nadu',
       'ranking': 5,
-      'logo': 'https://upload.wikimedia.org/wikipedia/en/8/8c/National_Institute_of_Technology%2C_Tiruchirappalli_logo.png',
+      'logo':
+          'https://upload.wikimedia.org/wikipedia/en/8/8c/National_Institute_of_Technology%2C_Tiruchirappalli_logo.png',
       'tuitionFee': '₹1,50,000',
       'collegeFee': '₹30,000',
       'hostelFee': '₹60,000',
@@ -251,7 +255,8 @@ Future<void> populateFirebaseWithColleges() async {
         'applicationDeadline': 'June 30, 2024'
       },
       'contact': {'email': 'info@nitt.edu', 'phone': '+91-431-2503000'},
-      'description': 'Premier engineering institution known for excellence in technical education and research.',
+      'description':
+          'Premier engineering institution known for excellence in technical education and research.',
       'images': [
         'https://images.unsplash.com/photo-1562774053-701939374585?w=800&h=600&fit=crop',
         'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&h=600&fit=crop'
@@ -264,7 +269,8 @@ Future<void> populateFirebaseWithColleges() async {
       'shortName': 'BITS Pilani',
       'location': 'Pilani, Rajasthan',
       'ranking': 3,
-      'logo': 'https://upload.wikimedia.org/wikipedia/en/5/5c/BITS_Pilani_Logo.png',
+      'logo':
+          'https://upload.wikimedia.org/wikipedia/en/5/5c/BITS_Pilani_Logo.png',
       'tuitionFee': '₹4,00,000',
       'collegeFee': '₹1,00,000',
       'hostelFee': '₹1,20,000',
@@ -301,8 +307,12 @@ Future<void> populateFirebaseWithColleges() async {
         'cutoff': 'Top 15,000 Ranks',
         'applicationDeadline': 'May 15, 2024'
       },
-      'contact': {'email': 'info@bits-pilani.ac.in', 'phone': '+91-1596-242210'},
-      'description': 'Premier private engineering institution with world-class facilities and excellent placement records.',
+      'contact': {
+        'email': 'info@bits-pilani.ac.in',
+        'phone': '+91-1596-242210'
+      },
+      'description':
+          'Premier private engineering institution with world-class facilities and excellent placement records.',
       'images': [
         'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=600&fit=crop',
         'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=600&fit=crop'
@@ -311,8 +321,106 @@ Future<void> populateFirebaseWithColleges() async {
 
     print('✅ All colleges added successfully to Firebase!');
     print('🎉 Your app is now ready with college data!');
+
+    // Add sample courses
+    await _addSampleCourses();
   } catch (e) {
     print('❌ Error adding colleges to Firebase: $e');
+  }
+}
+
+// Function to add sample courses
+Future<void> _addSampleCourses() async {
+  try {
+    print('🚀 Adding sample courses to Firebase...');
+
+    // Course 1: Flutter Development
+    await FirebaseService.addCollege({
+      'name': 'Complete Flutter Development Course',
+      'instructor': 'Dr. Sarah Johnson',
+      'category': 'Programming',
+      'price': 2999,
+      'originalPrice': 4999,
+      'rating': 4.8,
+      'reviewCount': 245,
+      'description':
+          'Master Flutter development from basics to advanced concepts. Build real-world mobile applications and learn best practices.',
+      'image':
+          'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&h=600&fit=crop',
+      'features': [
+        'Complete course materials',
+        'Lifetime access',
+        'Certificate of completion',
+        '24/7 support',
+        'Mobile and desktop access',
+        'Real-world projects',
+        'Code reviews'
+      ],
+      'duration': '8 weeks',
+      'level': 'Beginner to Advanced',
+      'language': 'English',
+      'type': 'course'
+    });
+
+    // Course 2: Data Science
+    await FirebaseService.addCollege({
+      'name': 'Data Science & Machine Learning',
+      'instructor': 'Prof. Michael Chen',
+      'category': 'Data Science',
+      'price': 3999,
+      'originalPrice': 6999,
+      'rating': 4.9,
+      'reviewCount': 189,
+      'description':
+          'Learn data science, machine learning, and AI from industry experts. Work with real datasets and build predictive models.',
+      'image':
+          'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop',
+      'features': [
+        'Complete course materials',
+        'Lifetime access',
+        'Certificate of completion',
+        '24/7 support',
+        'Mobile and desktop access',
+        'Real datasets',
+        'Industry projects'
+      ],
+      'duration': '12 weeks',
+      'level': 'Intermediate',
+      'language': 'English',
+      'type': 'course'
+    });
+
+    // Course 3: Digital Marketing
+    await FirebaseService.addCollege({
+      'name': 'Digital Marketing Masterclass',
+      'instructor': 'Lisa Rodriguez',
+      'category': 'Marketing',
+      'price': 1999,
+      'originalPrice': 3499,
+      'rating': 4.7,
+      'reviewCount': 156,
+      'description':
+          'Master digital marketing strategies, SEO, social media marketing, and analytics. Build your online presence.',
+      'image':
+          'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop',
+      'features': [
+        'Complete course materials',
+        'Lifetime access',
+        'Certificate of completion',
+        '24/7 support',
+        'Mobile and desktop access',
+        'Case studies',
+        'Marketing tools'
+      ],
+      'duration': '6 weeks',
+      'level': 'Beginner',
+      'language': 'English',
+      'type': 'course'
+    });
+
+    print('✅ All sample courses added successfully to Firebase!');
+  } catch (e) {
+    print('❌ Error adding sample courses to Firebase: $e');
   }
 }
 
@@ -351,7 +459,7 @@ class AuthenticationWrapper extends StatelessWidget {
         }
 
         final hasSeenOnboarding = onboardingSnapshot.data ?? false;
-        
+
         if (!hasSeenOnboarding) {
           // Show onboarding for new users
           return const OnboardingFlow();
@@ -368,8 +476,8 @@ class AuthenticationWrapper extends StatelessWidget {
             }
 
             if (snapshot.hasData && snapshot.data != null) {
-              // User is signed in, go to saved colleges page (main page)
-              return const SavedCollegesScreen();
+              // User is signed in, go to main navigation (search page as default)
+              return const MainNavigationWrapper();
             } else {
               // User is not signed in, go to auth screen
               return const SimpleAuthScreen();

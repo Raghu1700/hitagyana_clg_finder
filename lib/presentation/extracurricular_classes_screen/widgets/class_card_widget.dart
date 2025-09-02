@@ -5,6 +5,8 @@ import '../../../core/app_export.dart';
 import '../../../theme/app_theme.dart';
 import '../../../widgets/custom_icon_widget.dart';
 import '../../../widgets/custom_image_widget.dart';
+import '../../course_page/course_page.dart';
+import '../../main_navigation/custom_page_route.dart';
 
 class ClassCardWidget extends StatelessWidget {
   final Map<String, dynamic> classData;
@@ -28,7 +30,7 @@ class ClassCardWidget extends StatelessWidget {
     final bool isWishlisted = classData['isWishlisted'] ?? false;
 
     return GestureDetector(
-      onTap: () => _showClassDetails(context),
+      onTap: () => _navigateToCourse(context),
       onLongPress: () => _showQuickActions(context),
       child: Card(
         elevation: 2,
@@ -224,39 +226,39 @@ class ClassCardWidget extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        if (isEnrolled)
-          ElevatedButton(
-            onPressed: onEnroll,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.byzantium,
-              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+        Row(
+          children: [
+            IconButton(
+              onPressed: onWishlist,
+              icon: CustomIconWidget(
+                iconName: isWishlisted ? 'favorite' : 'favorite_border',
+                color: isWishlisted
+                    ? Colors.red
+                    : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                size: 24,
+              ),
             ),
-            child: const Text('Continue Learning'),
-          )
-        else
-          Row(
-            children: [
-              IconButton(
-                onPressed: onWishlist,
-                icon: CustomIconWidget(
-                  iconName: isWishlisted ? 'favorite' : 'favorite_border',
-                  color: isWishlisted
-                      ? Colors.red
-                      : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                  size: 24,
-                ),
+            SizedBox(width: 2.w),
+            Text(
+              'Tap to view details',
+              style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                fontStyle: FontStyle.italic,
               ),
-              SizedBox(width: 2.w),
-              ElevatedButton(
-                onPressed: onEnroll,
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
-                ),
-                child: const Text('Enroll Now'),
-              ),
-            ],
-          ),
+            ),
+          ],
+        ),
       ],
+    );
+  }
+
+  void _navigateToCourse(BuildContext context) {
+    Navigator.push(
+      context,
+      CustomPageRoute(
+        child: CoursePage(course: classData),
+        routeName: '/course-page',
+      ),
     );
   }
 

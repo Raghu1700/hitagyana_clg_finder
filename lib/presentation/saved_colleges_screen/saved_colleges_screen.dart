@@ -284,8 +284,7 @@ class _SavedCollegesScreenState extends State<SavedCollegesScreen>
       appBar: AppBar(
         backgroundColor: AppTheme.pureWhite,
         elevation: 0,
-        automaticallyImplyLeading:
-            false, // Remove back button since this is main page
+        automaticallyImplyLeading: false,
         title: Text(
           "Saved Colleges",
           style: TextStyle(
@@ -296,18 +295,6 @@ class _SavedCollegesScreenState extends State<SavedCollegesScreen>
         ),
         centerTitle: true,
         actions: [
-          // Navigation to search screen
-          IconButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/college-search-dashboard');
-            },
-            icon: Icon(
-              Icons.search,
-              color: AppTheme.byzantium,
-              size: 24,
-            ),
-            tooltip: 'Search Colleges',
-          ),
           if (_savedColleges.isNotEmpty)
             IconButton(
               onPressed: _toggleEditMode,

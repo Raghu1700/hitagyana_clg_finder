@@ -15,8 +15,7 @@ class ExtracurricularClassesScreen extends StatefulWidget {
 }
 
 class _ExtracurricularClassesScreenState
-    extends State<ExtracurricularClassesScreen> with TickerProviderStateMixin {
-  late TabController _tabController;
+    extends State<ExtracurricularClassesScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -169,13 +168,11 @@ class _ExtracurricularClassesScreenState
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this, initialIndex: 1);
     _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
     _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -256,7 +253,6 @@ class _ExtracurricularClassesScreenState
       appBar: _buildAppBar(),
       body: Column(
         children: [
-          _buildTabBar(),
           _buildSearchAndFilter(),
           _buildCategoryChips(),
           Expanded(
@@ -269,53 +265,18 @@ class _ExtracurricularClassesScreenState
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: AppTheme.lightTheme.appBarTheme.backgroundColor,
+      backgroundColor: AppTheme.pureWhite,
       elevation: 0,
-      leading: IconButton(
-        onPressed: () => Navigator.pop(context),
-        icon: CustomIconWidget(
-          iconName: 'arrow_back',
-          color: AppTheme.lightTheme.colorScheme.onSurface,
-          size: 24,
-        ),
-      ),
+      automaticallyImplyLeading: false,
       title: Text(
-        'Hitagyana Clg Finder',
-        style: AppTheme.lightTheme.appBarTheme.titleTextStyle,
-      ),
-      actions: [
-        IconButton(
-          onPressed: () {},
-          icon: CustomIconWidget(
-            iconName: 'notifications_outlined',
-            color: AppTheme.lightTheme.colorScheme.onSurface,
-            size: 24,
-          ),
+        "Classes",
+        style: TextStyle(
+          color: AppTheme.tyrianPurple,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
         ),
-        SizedBox(width: 2.w),
-      ],
-    );
-  }
-
-  Widget _buildTabBar() {
-    return Container(
-      color: AppTheme.lightTheme.colorScheme.surface,
-      child: TabBar(
-        controller: _tabController,
-        tabs: const [
-          Tab(text: 'Colleges'),
-          Tab(text: 'Classes'),
-          Tab(text: 'Saved'),
-        ],
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacementNamed(
-                context, '/college-search-dashboard');
-          } else if (index == 2) {
-            Navigator.pushReplacementNamed(context, '/saved-colleges-screen');
-          }
-        },
       ),
+      centerTitle: true,
     );
   }
 

@@ -13,7 +13,7 @@ class EmptySavedCollegesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.all(24),
         child: Column(
@@ -22,7 +22,7 @@ class EmptySavedCollegesWidget extends StatelessWidget {
             // Illustration
             Container(
               width: 60.w,
-              height: 30.h,
+              height: 25.h,
               decoration: BoxDecoration(
                 color: AppTheme.lightTheme.primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
@@ -46,7 +46,7 @@ class EmptySavedCollegesWidget extends StatelessWidget {
               ),
             ),
 
-            SizedBox(height: 32),
+            SizedBox(height: 20),
 
             // Title
             Text(
@@ -57,7 +57,7 @@ class EmptySavedCollegesWidget extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
 
-            SizedBox(height: 12),
+            SizedBox(height: 8),
 
             // Description
             Text(
@@ -69,7 +69,7 @@ class EmptySavedCollegesWidget extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
 
-            SizedBox(height: 32),
+            SizedBox(height: 20),
 
             // CTA Button
             SizedBox(
@@ -88,7 +88,7 @@ class EmptySavedCollegesWidget extends StatelessWidget {
               ),
             ),
 
-            SizedBox(height: 16),
+            SizedBox(height: 12),
 
             // Secondary Action
             TextButton.icon(
@@ -103,11 +103,11 @@ class EmptySavedCollegesWidget extends StatelessWidget {
               label: Text('View Popular Colleges'),
             ),
 
-            SizedBox(height: 40),
+            SizedBox(height: 20),
 
             // Features List
             Container(
-              padding: EdgeInsets.all(20),
+              padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppTheme.lightTheme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
@@ -152,6 +152,7 @@ class EmptySavedCollegesWidget extends StatelessWidget {
                 ],
               ),
             ),
+            SizedBox(height: 20), // Add extra padding at bottom
           ],
         ),
       ),

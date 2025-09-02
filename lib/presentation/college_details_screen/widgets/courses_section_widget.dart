@@ -208,6 +208,7 @@ class _CoursesSectionWidgetState extends State<CoursesSectionWidget> {
               ),
               SizedBox(width: 3.w),
               Expanded(
+                flex: 3,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -217,6 +218,8 @@ class _CoursesSectionWidgetState extends State<CoursesSectionWidget> {
                           AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       course['type'].toString().toUpperCase(),
@@ -228,17 +231,24 @@ class _CoursesSectionWidgetState extends State<CoursesSectionWidget> {
                   ],
                 ),
               ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
-                decoration: BoxDecoration(
-                  color: cardColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  "${course['seats']} seats",
-                  style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-                    color: cardColor,
-                    fontWeight: FontWeight.w600,
+              SizedBox(width: 2.w),
+              Flexible(
+                flex: 1,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
+                  decoration: BoxDecoration(
+                    color: cardColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    "${course['seats']} seats",
+                    style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+                      color: cardColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ),

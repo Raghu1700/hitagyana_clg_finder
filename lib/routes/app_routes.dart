@@ -8,6 +8,9 @@ import '../presentation/college_search_dashboard/college_search_dashboard.dart';
 import '../presentation/extracurricular_classes_screen/extracurricular_classes_screen.dart';
 import '../presentation/onboarding_flow/onboarding_flow.dart';
 import '../presentation/saved_colleges_screen/saved_colleges_screen.dart';
+import '../presentation/course_page/course_page.dart';
+import '../presentation/enrolled_classes_screen/enrolled_classes_screen.dart';
+import '../presentation/main_navigation/main_navigation_wrapper.dart';
 
 class AppRoutes {
   static const String initial = '/simple-auth-screen'; // Skip splash screen
@@ -20,6 +23,9 @@ class AppRoutes {
   static const String savedCollegesScreen = '/saved-colleges-screen';
   static const String extracurricularClassesScreen =
       '/extracurricular-classes-screen';
+  static const String coursePage = '/course-page';
+  static const String enrolledClassesScreen = '/enrolled-classes-screen';
+  static const String mainNavigation = '/main-navigation';
 
   static Map<String, WidgetBuilder> routes = {
     initial: (context) => const SimpleAuthScreen(),
@@ -32,5 +38,12 @@ class AppRoutes {
     savedCollegesScreen: (context) => const SavedCollegesScreen(),
     extracurricularClassesScreen: (context) =>
         const ExtracurricularClassesScreen(),
+    coursePage: (context) {
+      final course =
+          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+      return CoursePage(course: course);
+    },
+    enrolledClassesScreen: (context) => const EnrolledClassesScreen(),
+    mainNavigation: (context) => const MainNavigationWrapper(),
   };
 }

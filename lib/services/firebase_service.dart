@@ -230,4 +230,81 @@ class FirebaseService {
       return false;
     }
   }
+
+  // Course enrollment methods
+  static Future<bool> enrollInCourse(
+      String userId, String courseId, String paymentId) async {
+    try {
+      final enrollmentData = {
+        'userId': userId,
+        'courseId': courseId,
+        'paymentId': paymentId,
+        'enrolledAt': FieldValue.serverTimestamp(),
+        'progress': 0,
+        'status': 'active',
+      };
+
+      await _firestore
+          .collection('enrollments')
+          .doc('${userId}_$courseId')
+          .set(enrollmentData);
+
+      print('✅ User $userId enrolled in course $courseId');
+      return true;
+    } catch (e) {
+      print('Error enrolling in course: $e');
+      return false;
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> getEnrolledCourses(
+      String userId) async {
+    try {
+      final QuerySnapshot querySnapshot = await _firestore
+          .collection('enrollments')
+          .where('userId', isEqualTo: userId)
+          .where('status', isEqualTo: 'active')
+          .get();
+
+      List<Map<String, dynamic>> enrolledCourses = [];
+
+      for (var doc in querySnapshot.docs) {
+        final enrollmentData = doc.data() as Map<String, dynamic>;
+        final courseId = enrollmentData['courseId'];
+
+        // Get course details from courses collection
+        final courseDoc =
+            await _firestore.collection('courses').doc(courseId).get();
+
+        if (courseDoc.exists) {
+          final courseData = courseDoc.data() as Map<String, dynamic>;
+          courseData['id'] = courseId;
+          courseData['enrollmentId'] = doc.id;
+          courseData['enrolledAt'] = enrollmentData['enrolledAt'];
+          courseData['progress'] = enrollmentData['progress'] ?? 0;
+          enrolledCourses.add(courseData);
+        }
+      }
+
+      return enrolledCourses;
+    } catch (e) {
+      print('Error getting enrolled courses: $e');
+      return [];
+    }
+  }
+
+  static Future<bool> updateCourseProgress(
+      String userId, String courseId, int progress) async {
+    try {
+      await _firestore
+          .collection('enrollments')
+          .doc('${userId}_$courseId')
+          .update({'progress': progress});
+
+      return true;
+    } catch (e) {
+      print('Error updating course progress: $e');
+      return false;
+    }
+  }
 }

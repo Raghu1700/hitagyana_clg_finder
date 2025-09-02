@@ -189,103 +189,27 @@ class _CollegeSearchDashboardState extends State<CollegeSearchDashboard>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.lightTheme.scaffoldBackgroundColor,
+      backgroundColor: AppTheme.almond,
       appBar: AppBar(
-        backgroundColor: AppTheme.lightTheme.appBarTheme.backgroundColor,
+        backgroundColor: AppTheme.pureWhite,
         elevation: 0,
+        automaticallyImplyLeading: false,
         title: Text(
-          "Hitagyana Clg Finder",
-          style: AppTheme.lightTheme.appBarTheme.titleTextStyle,
+          "Hitagyana College Finder",
+          style: TextStyle(
+            color: AppTheme.tyrianPurple,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         centerTitle: true,
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(
-              icon: CustomIconWidget(
-                iconName: 'search',
-                size: 20,
-                color: _tabController.index == 0
-                    ? AppTheme.lightTheme.primaryColor
-                    : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-              ),
-              text: "Search",
-            ),
-            Tab(
-              icon: CustomIconWidget(
-                iconName: 'bookmark',
-                size: 20,
-                color: _tabController.index == 1
-                    ? AppTheme.lightTheme.primaryColor
-                    : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-              ),
-              text: "Saved",
-            ),
-            Tab(
-              icon: CustomIconWidget(
-                iconName: 'school',
-                size: 20,
-                color: _tabController.index == 2
-                    ? AppTheme.lightTheme.primaryColor
-                    : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-              ),
-              text: "Classes",
-            ),
-            Tab(
-              icon: CustomIconWidget(
-                iconName: 'person',
-                size: 20,
-                color: _tabController.index == 3
-                    ? AppTheme.lightTheme.primaryColor
-                    : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-              ),
-              text: "Profile",
-            ),
-          ],
-          onTap: (index) {
-            switch (index) {
-              case 1:
-                Navigator.pushNamed(context, '/saved-colleges-screen');
-                break;
-              case 2:
-                Navigator.pushNamed(context, '/extracurricular-classes-screen');
-                break;
-              case 3:
-                // Stay on current tab for profile
-                break;
-            }
-          },
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: AppTheme.backgroundGradient,
         ),
+        child: _buildSearchTab(),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        physics:
-            const NeverScrollableScrollPhysics(), // Disable swipe functionality
-        children: [
-          _buildSearchTab(),
-          Container(), // Saved tab placeholder
-          Container(), // Classes tab placeholder
-          _buildProfileTab(), // Profile tab
-        ],
-      ),
-      floatingActionButton: _tabController.index == 0
-          ? FloatingActionButton.extended(
-              onPressed: _showFilterBottomSheet,
-              backgroundColor: AppTheme.lightTheme.primaryColor,
-              foregroundColor: AppTheme.lightTheme.colorScheme.onPrimary,
-              icon: CustomIconWidget(
-                iconName: 'tune',
-                size: 20,
-                color: AppTheme.lightTheme.colorScheme.onPrimary,
-              ),
-              label: Text(
-                "Advanced Search",
-                style: AppTheme.lightTheme.textTheme.labelLarge?.copyWith(
-                  color: AppTheme.lightTheme.colorScheme.onPrimary,
-                ),
-              ),
-            )
-          : null,
     );
   }
 
@@ -295,6 +219,7 @@ class _CollegeSearchDashboardState extends State<CollegeSearchDashboard>
       child: Column(
         children: [
           _buildSearchBar(),
+          _buildAdvancedSearchButton(),
           _buildRecommendationChips(),
           Expanded(
             child: _isLoading && _filteredColleges.isEmpty
@@ -1489,6 +1414,37 @@ class _CollegeSearchDashboardState extends State<CollegeSearchDashboard>
 
   void _navigateToCollegeDetails(Map<String, dynamic> college) {
     Navigator.pushNamed(context, '/college-details-screen');
+  }
+
+  Widget _buildAdvancedSearchButton() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      child: ElevatedButton.icon(
+        onPressed: _showFilterBottomSheet,
+        icon: Icon(
+          Icons.tune,
+          color: AppTheme.pureWhite,
+          size: 20,
+        ),
+        label: Text(
+          'Advanced Search',
+          style: TextStyle(
+            color: AppTheme.pureWhite,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppTheme.tyrianPurple,
+          foregroundColor: AppTheme.pureWhite,
+          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 2,
+        ),
+      ),
+    );
   }
 
   void _showFilterBottomSheet() {

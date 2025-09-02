@@ -541,30 +541,43 @@ class _CollegeDetailsScreenState extends State<CollegeDetailsScreen>
                     Expanded(
                       child: OutlinedButton(
                         onPressed: _toggleFavorite,
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                        ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             CustomIconWidget(
                               iconName:
                                   _isFavorite ? 'favorite' : 'favorite_border',
                               color: AppTheme.lightTheme.colorScheme.primary,
-                              size: 20,
+                              size: 18,
                             ),
-                            SizedBox(width: 2.w),
-                            Text(
-                                _isFavorite ? "Favorited" : "Add to Favorites"),
+                            SizedBox(width: 1.w),
+                            Flexible(
+                              child: Text(
+                                _isFavorite ? "Favorited" : "Add to Favorites",
+                                style: TextStyle(fontSize: 12),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                     ),
-                    SizedBox(width: 3.w),
+                    SizedBox(width: 2.w),
                     Expanded(
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _launchWebsite,
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                        ),
                         child: _isLoading
                             ? SizedBox(
-                                width: 20,
-                                height: 20,
+                                width: 18,
+                                height: 18,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -574,15 +587,23 @@ class _CollegeDetailsScreenState extends State<CollegeDetailsScreen>
                               )
                             : Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   CustomIconWidget(
                                     iconName: 'language',
                                     color: AppTheme
                                         .lightTheme.colorScheme.onPrimary,
-                                    size: 20,
+                                    size: 18,
                                   ),
-                                  SizedBox(width: 2.w),
-                                  Text("Visit Website"),
+                                  SizedBox(width: 1.w),
+                                  Flexible(
+                                    child: Text(
+                                      "Visit Website",
+                                      style: TextStyle(fontSize: 12),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
                                 ],
                               ),
                       ),
