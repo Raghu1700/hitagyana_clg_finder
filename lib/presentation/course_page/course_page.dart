@@ -5,11 +5,17 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../core/app_export.dart';
 import '../../services/auth_service.dart';
 import '../../services/firebase_service.dart';
+import 'widgets/zoom_meeting_section.dart';
 
 class CoursePage extends StatefulWidget {
   final Map<String, dynamic> course;
+  final bool isEnrolled;
 
-  const CoursePage({Key? key, required this.course}) : super(key: key);
+  const CoursePage({
+    Key? key, 
+    required this.course,
+    this.isEnrolled = false,
+  }) : super(key: key);
 
   @override
   State<CoursePage> createState() => _CoursePageState();
@@ -27,7 +33,13 @@ class _CoursePageState extends State<CoursePage> {
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
-    _checkEnrollmentStatus();
+    
+    // If course is from My Classes, mark as enrolled immediately
+    if (widget.isEnrolled) {
+      _isEnrolled = true;
+    } else {
+      _checkEnrollmentStatus();
+    }
   }
 
   @override
@@ -344,6 +356,13 @@ class _CoursePageState extends State<CoursePage> {
               ),
 
               SizedBox(height: 3.h),
+
+              // Zoom Meeting Section (Only for Enrolled Students)
+              if (_isEnrolled)
+                ZoomMeetingSection(course: widget.course),
+
+              if (_isEnrolled)
+                SizedBox(height: 3.h),
 
               // Enrollment Button
               if (!_isEnrolled)

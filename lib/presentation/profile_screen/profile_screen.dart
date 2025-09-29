@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/app_export.dart';
 import '../../services/auth_service.dart';
-import '../../services/firebase_service.dart';
 import '../../services/user_service.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -30,12 +30,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       final user = AuthService.currentUser;
       if (user != null) {
-        final profile = await UserService.getUserProfile(user.uid);
+        // Add timeout to prevent infinite loading
+        final profile = await UserService.getUserProfile(user.uid)
+            .timeout(const Duration(seconds: 10));
+        
         if (mounted) {
           setState(() {
             _userProfile = profile;
             _isLoading = false;
           });
+        }
+      } else {
+        if (mounted) {
+          setState(() => _isLoading = false);
         }
       }
     } catch (e) {
@@ -43,22 +50,284 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+      // Show error toast
+      Fluttertoast.showToast(
+        msg: "Profile loaded with limited info",
+        backgroundColor: AppTheme.byzantium,
+      );
     }
   }
 
   Future<void> _signOut() async {
-    try {
-      await AuthService.signOut();
-      if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/simple-auth-screen',
-          (route) => false,
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sign Out'),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Sign Out'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await AuthService.signOut();
+        if (mounted) {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/simple-auth-screen',
+            (route) => false,
+          );
+        }
+      } catch (e) {
+        print('Error signing out: $e');
+        Fluttertoast.showToast(
+          msg: "Error signing out. Please try again.",
+          backgroundColor: Colors.red,
         );
       }
-    } catch (e) {
-      print('Error signing out: $e');
     }
+  }
+
+  void _showEditProfileDialog() {
+    final user = AuthService.currentUser;
+    final usernameController = TextEditingController(
+      text: _userProfile?['username'] ?? user?.displayName ?? '',
+    );
+    final emailController = TextEditingController(text: user?.email ?? '');
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.edit, color: AppTheme.tyrianPurple),
+            SizedBox(width: 2.w),
+            const Text('Edit Profile'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: usernameController,
+              decoration: InputDecoration(
+                labelText: 'Username',
+                prefixIcon: Icon(Icons.person, color: AppTheme.tyrianPurple),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            SizedBox(height: 2.h),
+            TextField(
+              controller: emailController,
+              enabled: false,
+              decoration: InputDecoration(
+                labelText: 'Email (Read-only)',
+                prefixIcon: Icon(Icons.email, color: AppTheme.byzantium),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: Colors.grey[100],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final newUsername = usernameController.text.trim();
+              if (newUsername.isNotEmpty && user != null) {
+                await UserService.updateUserProfile(user.uid, {
+                  'username': newUsername,
+                });
+                await _loadUserProfile();
+                Navigator.pop(context);
+                Fluttertoast.showToast(
+                  msg: 'Profile updated successfully!',
+                  backgroundColor: AppTheme.tyrianPurple,
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.tyrianPurple,
+            ),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.settings, color: AppTheme.tyrianPurple),
+            SizedBox(width: 2.w),
+            const Text('Settings'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.notifications_outlined, color: AppTheme.tyrianPurple),
+                title: const Text('Notifications'),
+                subtitle: const Text('Manage notification preferences'),
+                trailing: Switch(
+                  value: true,
+                  activeColor: AppTheme.tyrianPurple,
+                  onChanged: (value) {
+                    Fluttertoast.showToast(
+                      msg: 'Notifications ${value ? "enabled" : "disabled"}',
+                      backgroundColor: AppTheme.byzantium,
+                    );
+                  },
+                ),
+              ),
+              ListTile(
+                leading: Icon(Icons.email_outlined, color: AppTheme.tyrianPurple),
+                title: const Text('Email Updates'),
+                subtitle: const Text('Receive email notifications'),
+                trailing: Switch(
+                  value: false,
+                  activeColor: AppTheme.tyrianPurple,
+                  onChanged: (value) {
+                    Fluttertoast.showToast(
+                      msg: 'Email updates ${value ? "enabled" : "disabled"}',
+                      backgroundColor: AppTheme.byzantium,
+                    );
+                  },
+                ),
+              ),
+              ListTile(
+                leading: Icon(Icons.lock_outline, color: AppTheme.tyrianPurple),
+                title: const Text('Change Password'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  Navigator.pop(context);
+                  Fluttertoast.showToast(
+                    msg: 'Use "Forgot Password" on login screen to reset',
+                    backgroundColor: AppTheme.tyrianPurple,
+                    toastLength: Toast.LENGTH_LONG,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showHelpDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.help_outline, color: AppTheme.tyrianPurple),
+            SizedBox(width: 2.w),
+            const Text('Help & Support'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.email, color: AppTheme.tyrianPurple),
+                title: const Text('Email Support'),
+                subtitle: const Text('support@hitagyana.com'),
+                onTap: () async {
+                  final Uri emailUri = Uri(
+                    scheme: 'mailto',
+                    path: 'support@hitagyana.com',
+                    query: 'subject=App Support Request',
+                  );
+                  if (await canLaunchUrl(emailUri)) {
+                    await launchUrl(emailUri);
+                  } else {
+                    Fluttertoast.showToast(
+                      msg: 'Could not open email app',
+                      backgroundColor: Colors.red,
+                    );
+                  }
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.phone, color: AppTheme.tyrianPurple),
+                title: const Text('Call Us'),
+                subtitle: const Text('+91 1800-XXX-XXXX'),
+                onTap: () async {
+                  final Uri phoneUri = Uri(scheme: 'tel', path: '+911800XXXXXXX');
+                  if (await canLaunchUrl(phoneUri)) {
+                    await launchUrl(phoneUri);
+                  } else {
+                    Fluttertoast.showToast(
+                      msg: 'Could not open phone dialer',
+                      backgroundColor: Colors.red,
+                    );
+                  }
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.chat_bubble_outline, color: AppTheme.tyrianPurple),
+                title: const Text('WhatsApp Support'),
+                subtitle: const Text('Chat with us'),
+                onTap: () async {
+                  final Uri whatsappUri = Uri.parse('https://wa.me/911800XXXXXXX');
+                  if (await canLaunchUrl(whatsappUri)) {
+                    await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
+                  } else {
+                    Fluttertoast.showToast(
+                      msg: 'Could not open WhatsApp',
+                      backgroundColor: Colors.red,
+                    );
+                  }
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.info_outline, color: AppTheme.tyrianPurple),
+                title: const Text('App Version'),
+                subtitle: const Text('v1.0.0'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -112,7 +381,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  user?.displayName ?? 'User',
+                                  _userProfile?['username']?.toString() ?? 
+                                  user?.displayName ?? 
+                                  user?.email?.split('@').first ?? 
+                                  'User',
                                   style: TextStyle(
                                     color: AppTheme.pureWhite,
                                     fontSize: 18,
@@ -141,12 +413,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       icon: Icons.person_outline,
                       title: 'Edit Profile',
                       subtitle: 'Update your personal information',
-                      onTap: () {
-                        // TODO: Implement edit profile
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Edit Profile coming soon!')),
-                        );
-                      },
+                      onTap: _showEditProfileDialog,
                     ),
                     
                     _buildProfileOption(
@@ -154,8 +421,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       title: 'Saved Colleges',
                       subtitle: 'View your saved colleges',
                       onTap: () {
-                        // Navigate to saved colleges (tab 1)
-                        // This will be handled by the main navigation
+                        Fluttertoast.showToast(
+                          msg: "Tap 'Saved' in the bottom navigation bar",
+                          backgroundColor: AppTheme.tyrianPurple,
+                          toastLength: Toast.LENGTH_LONG,
+                        );
                       },
                     ),
                     
@@ -164,8 +434,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       title: 'My Classes',
                       subtitle: 'View enrolled courses',
                       onTap: () {
-                        // Navigate to enrolled classes (tab 4)
-                        // This will be handled by the main navigation
+                        Fluttertoast.showToast(
+                          msg: "Tap 'My Classes' in the bottom navigation bar",
+                          backgroundColor: AppTheme.tyrianPurple,
+                          toastLength: Toast.LENGTH_LONG,
+                        );
                       },
                     ),
                     
@@ -173,24 +446,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       icon: Icons.settings_outlined,
                       title: 'Settings',
                       subtitle: 'App preferences and settings',
-                      onTap: () {
-                        // TODO: Implement settings
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Settings coming soon!')),
-                        );
-                      },
+                      onTap: _showSettingsDialog,
                     ),
                     
                     _buildProfileOption(
                       icon: Icons.help_outline,
                       title: 'Help & Support',
                       subtitle: 'Get help and contact support',
-                      onTap: () {
-                        // TODO: Implement help
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Help & Support coming soon!')),
-                        );
-                      },
+                      onTap: _showHelpDialog,
                     ),
                     
                     SizedBox(height: 4.h),

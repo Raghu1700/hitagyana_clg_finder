@@ -22,7 +22,6 @@ class _ExtracurricularClassesScreenState
   String _selectedCategory = 'All';
   String _searchQuery = '';
   bool _isLoading = false;
-  bool _isRefreshing = false;
 
   final List<String> _categories = [
     'All',
@@ -53,7 +52,14 @@ class _ExtracurricularClassesScreenState
       "prerequisites": ["Basic computer skills", "Creative mindset"],
       "schedule": "Mon, Wed, Fri - 7:00 PM",
       "isEnrolled": false,
-      "isWishlisted": false
+      "isWishlisted": false,
+      "zoomMeetingId": "123 456 7890",
+      "zoomMeetingLink": "https://zoom.us/j/1234567890?pwd=abc123",
+      "zoomPassword": "art2025",
+      "isRecurring": true,
+      "recurringDays": ["Monday", "Wednesday", "Friday"],
+      "meetingTime": "7:00 PM - 8:30 PM",
+      "timezone": "IST",
     },
     {
       "id": 2,
@@ -77,7 +83,14 @@ class _ExtracurricularClassesScreenState
       ],
       "schedule": "Tue, Thu - 8:00 PM",
       "isEnrolled": true,
-      "isWishlisted": false
+      "isWishlisted": false,
+      "zoomMeetingId": "987 654 3210",
+      "zoomMeetingLink": "https://zoom.us/j/9876543210?pwd=xyz789",
+      "zoomPassword": "python123",
+      "isRecurring": true,
+      "recurringDays": ["Tuesday", "Thursday"],
+      "meetingTime": "8:00 PM - 9:30 PM",
+      "timezone": "IST",
     },
     {
       "id": 3,
@@ -201,16 +214,8 @@ class _ExtracurricularClassesScreenState
   }
 
   Future<void> _refreshClasses() async {
-    setState(() {
-      _isRefreshing = true;
-    });
-
     // Simulate API call
     await Future.delayed(const Duration(seconds: 1));
-
-    setState(() {
-      _isRefreshing = false;
-    });
   }
 
   List<Map<String, dynamic>> get _filteredClasses {

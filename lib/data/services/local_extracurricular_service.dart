@@ -237,10 +237,6 @@ class LocalExtracurricularService {
     await init();
 
     // Simple recommendation logic based on enrolled classes and ratings
-    final enrolledClasses = await getEnrolledClasses();
-    final enrolledCategories =
-        enrolledClasses.map((cls) => cls.category).toSet();
-
     var recommendations = _classes.where((cls) {
       // Don't recommend already enrolled classes
       if (_enrolledClassIds.contains(cls.id)) return false;
@@ -319,6 +315,13 @@ class LocalExtracurricularService {
         metadata: {'language': 'English', 'timezone': 'IST'},
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
+        zoomMeetingId: '123 456 7890',
+        zoomMeetingLink: 'https://zoom.us/j/1234567890?pwd=abc123',
+        zoomPassword: 'art2025',
+        isRecurring: true,
+        recurringDays: ['Monday', 'Wednesday', 'Friday'],
+        meetingTime: '7:00 PM - 8:30 PM',
+        timezone: 'IST',
       ),
       ExtracurricularClassModel(
         id: '2',
@@ -349,6 +352,13 @@ class LocalExtracurricularService {
         metadata: {'language': 'English', 'timezone': 'IST'},
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
+        zoomMeetingId: '987 654 3210',
+        zoomMeetingLink: 'https://zoom.us/j/9876543210?pwd=xyz789',
+        zoomPassword: 'python123',
+        isRecurring: true,
+        recurringDays: ['Tuesday', 'Thursday'],
+        meetingTime: '8:00 PM - 9:30 PM',
+        timezone: 'IST',
       ),
       ExtracurricularClassModel(
         id: '3',

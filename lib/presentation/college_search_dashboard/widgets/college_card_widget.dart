@@ -66,7 +66,7 @@ class CollegeCardWidget extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: CustomImageWidget(
-                imageUrl: college["logo"] as String,
+                imageUrl: college["logo"]?.toString() ?? '',
                 width: 15.w,
                 height: 15.w,
                 fit: BoxFit.cover,
@@ -82,7 +82,7 @@ class CollegeCardWidget extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        college["shortName"] as String,
+                        college["shortName"]?.toString() ?? 'College Name',
                         style:
                             AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
@@ -105,7 +105,7 @@ class CollegeCardWidget extends StatelessWidget {
                     SizedBox(width: 1.w),
                     Expanded(
                       child: Text(
-                        college["location"] as String,
+                        college["location"]?.toString() ?? 'Location not available',
                         style: AppTheme.lightTheme.textTheme.bodySmall,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -202,7 +202,7 @@ class CollegeCardWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            college["name"] as String,
+            college["name"]?.toString() ?? 'College Name',
             style: AppTheme.lightTheme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w500,
             ),
@@ -264,9 +264,9 @@ class CollegeCardWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildFeeItem("Tuition", college["tuitionFee"] as String),
-              _buildFeeItem("College", college["collegeFee"] as String),
-              _buildFeeItem("Hostel", college["hostelFee"] as String),
+              _buildFeeItem("Tuition", college["tuitionFee"]?.toString() ?? 'N/A'),
+              _buildFeeItem("College", college["collegeFee"]?.toString() ?? 'N/A'),
+              _buildFeeItem("Hostel", college["hostelFee"]?.toString() ?? 'N/A'),
             ],
           ),
           SizedBox(height: 1.h),
@@ -286,7 +286,7 @@ class CollegeCardWidget extends StatelessWidget {
                 ),
               ),
               Text(
-                college["totalFee"] as String,
+                college["totalFee"]?.toString() ?? 'N/A',
                 style: AppTheme.lightTheme.textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: AppTheme.lightTheme.primaryColor,
@@ -382,7 +382,7 @@ class CollegeCardWidget extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(college["shortName"] as String),
+        title: Text(college["shortName"]?.toString() ?? 'College'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

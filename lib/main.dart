@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'routes/app_routes.dart';
@@ -26,18 +27,10 @@ void main() async {
 // Clear old saved college data to start fresh
 Future<void> clearOldSavedColleges() async {
   try {
-    final prefs = await SharedPreferences.getInstance();
-    final hasCleared = prefs.getBool('hasCleared_v2') ?? false;
-
-    if (!hasCleared) {
-      await prefs.remove('savedColleges');
-      await prefs
-          .remove('hasSeenOnboarding'); // Clear onboarding to show it again
-      await prefs.setBool('hasCleared_v2', true);
-      print('🧹 Cleared old saved colleges data and onboarding status');
-    }
+    // Don't clear anything - let onboarding and auth persist naturally
+    print('✅ App initialized - checking existing session');
   } catch (e) {
-    print('Error clearing old data: $e');
+    print('Error: $e');
   }
 }
 
@@ -419,8 +412,163 @@ Future<void> _addSampleCourses() async {
     });
 
     print('✅ All sample courses added successfully to Firebase!');
+    
+    // Add a mock enrollment for testing
+    await _addMockEnrollment();
   } catch (e) {
     print('❌ Error adding sample courses to Firebase: $e');
+  }
+}
+
+// Function to add mock enrollment
+Future<void> _addMockEnrollment() async {
+  try {
+    print('🚀 Adding mock enrollment to Firebase...');
+    
+    // Check if user is logged in before adding enrollment
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Add enrollment for Python Programming course
+      await FirebaseService.enrollInCourse(
+        user.uid,
+        '2', // Course ID for Python Programming
+        'mock_payment_123',
+      );
+      print('✅ Mock enrollment added for Python Programming course!');
+    } else {
+      print('⚠️ No user logged in, skipping mock enrollment');
+    }
+    
+    // Add sample classes to my_classes collection
+    await _addSampleMyClasses();
+  } catch (e) {
+    print('❌ Error adding mock enrollment: $e');
+  }
+}
+
+// Function to add sample classes to my_classes collection
+Future<void> _addSampleMyClasses() async {
+  try {
+    print('🚀 Adding sample classes to my_classes collection...');
+    
+    // Check if classes already exist
+    final existingClasses = await FirebaseService.getMyClasses();
+    if (existingClasses.isNotEmpty) {
+      print('⚠️ My classes already exist, skipping...');
+      return;
+    }
+    
+    // Class 1: Python Programming Bootcamp
+    await FirebaseService.addMyClass({
+      'name': 'Python Programming Bootcamp',
+      'instructor': 'Michael Chen',
+      'image': 'https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'rating': 4.9,
+      'category': 'Technology',
+      'price': 4999,
+      'progress': 35,
+      'description': 'Master Python programming with hands-on projects and real-world applications.',
+      'enrolledAt': FieldValue.serverTimestamp(),
+      'zoomMeetingId': '987 654 3210',
+      'zoomMeetingLink': 'https://zoom.us/j/9876543210?pwd=xyz789',
+      'zoomPassword': 'python123',
+      'isRecurring': true,
+      'recurringDays': ['Tuesday', 'Thursday'],
+      'meetingTime': '8:00 PM - 9:30 PM',
+      'timezone': 'IST',
+    });
+    
+    // Class 2: Digital Art Fundamentals
+    await FirebaseService.addMyClass({
+      'name': 'Digital Art Fundamentals',
+      'instructor': 'Sarah Johnson',
+      'image': 'https://images.pexels.com/photos/1181298/pexels-photo-1181298.jpeg?auto=compress&cs=tinysrgb&w=400',
+      'rating': 4.8,
+      'category': 'Arts',
+      'price': 2999,
+      'progress': 65,
+      'description': 'Learn the fundamentals of digital art creation using industry-standard tools and techniques.',
+      'enrolledAt': FieldValue.serverTimestamp(),
+      'zoomMeetingId': '123 456 7890',
+      'zoomMeetingLink': 'https://zoom.us/j/1234567890?pwd=abc123',
+      'zoomPassword': 'art2025',
+      'isRecurring': true,
+      'recurringDays': ['Monday', 'Wednesday', 'Friday'],
+      'meetingTime': '7:00 PM - 8:30 PM',
+      'timezone': 'IST',
+    });
+    
+    print('✅ Sample classes added to my_classes collection!');
+    
+    // Add sample saved colleges
+    await _addSampleSavedColleges();
+  } catch (e) {
+    print('❌ Error adding sample my classes: $e');
+  }
+}
+
+// Function to add sample saved colleges to saved_colleges collection
+Future<void> _addSampleSavedColleges() async {
+  try {
+    print('🚀 Adding sample saved colleges to saved_colleges collection...');
+    
+    // Check if user is logged in
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      print('⚠️ No user logged in, skipping saved colleges');
+      return;
+    }
+    
+    // Check if saved colleges already exist
+    final existingSaved = await FirebaseService.getSavedCollegesData(user.uid);
+    if (existingSaved.isNotEmpty) {
+      print('⚠️ Saved colleges already exist, skipping...');
+      return;
+    }
+    
+    // Sample College 1: IIT Delhi
+    await FirebaseService.addSavedCollege(user.uid, {
+      'id': 'iit_delhi',
+      'name': 'Indian Institute of Technology Delhi',
+      'shortName': 'IIT Delhi',
+      'location': 'New Delhi, Delhi',
+      'ranking': 2,
+      'logo': 'https://upload.wikimedia.org/wikipedia/en/f/fd/Indian_Institute_of_Technology_Delhi_Logo.svg',
+      'totalFee': '₹3,75,000',
+      'rating': 4.8,
+      'reviewCount': 1250,
+      'website': 'https://www.iitd.ac.in',
+      'type': 'Government',
+      'accreditation': 'NAAC A++',
+      'images': [
+        'https://images.unsplash.com/photo-1562774053-701939374585?w=800&h=600&fit=crop',
+        'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&h=600&fit=crop'
+      ],
+    });
+    
+    // Sample College 2: BITS Pilani
+    await FirebaseService.addSavedCollege(user.uid, {
+      'id': 'bits_pilani',
+      'name': 'Birla Institute of Technology and Science',
+      'shortName': 'BITS Pilani',
+      'location': 'Pilani, Rajasthan',
+      'ranking': 3,
+      'logo': 'https://upload.wikimedia.org/wikipedia/en/5/5c/BITS_Pilani_Logo.png',
+      'totalFee': '₹6,20,000',
+      'rating': 4.7,
+      'reviewCount': 1200,
+      'website': 'https://www.bits-pilani.ac.in',
+      'type': 'Private',
+      'accreditation': 'NAAC A++',
+      'images': [
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=600&fit=crop',
+        'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=600&fit=crop'
+      ],
+    });
+    
+    print('✅ Sample saved colleges added to saved_colleges collection!');
+  } catch (e) {
+    print('❌ Error adding sample saved colleges: $e');
   }
 }
 
@@ -449,47 +597,7 @@ class AuthenticationWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: _checkOnboardingStatus(),
-      builder: (context, onboardingSnapshot) {
-        if (onboardingSnapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        final hasSeenOnboarding = onboardingSnapshot.data ?? false;
-
-        if (!hasSeenOnboarding) {
-          // Show onboarding for new users
-          return const OnboardingFlow();
-        }
-
-        // Check authentication status for existing users
-        return StreamBuilder<User?>(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            }
-
-            if (snapshot.hasData && snapshot.data != null) {
-              // User is signed in, go to main navigation (search page as default)
-              return const MainNavigationWrapper();
-            } else {
-              // User is not signed in, go to auth screen
-              return const SimpleAuthScreen();
-            }
-          },
-        );
-      },
-    );
-  }
-
-  Future<bool> _checkOnboardingStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('hasSeenOnboarding') ?? false;
+    // Always go directly to dashboard - skip all checks
+    return const MainNavigationWrapper();
   }
 }

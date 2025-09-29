@@ -4,7 +4,7 @@ import 'package:sizer/sizer.dart';
 import '../../../core/app_export.dart';
 
 class SearchFilterBottomSheet extends StatefulWidget {
-  final Function(int) onFiltersApplied;
+  final Function(Map<String, dynamic>) onFiltersApplied;
 
   const SearchFilterBottomSheet({
     super.key,
@@ -455,7 +455,15 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
             flex: 2,
             child: ElevatedButton(
               onPressed: () {
-                widget.onFiltersApplied(_activeFilterCount);
+                widget.onFiltersApplied({
+                  'feeRange': _feeRange,
+                  'rankingTier': _selectedRankingTier,
+                  'courses': _selectedCourses,
+                  'type': _selectedType,
+                  'hasHostel': _hasHostel,
+                  'hasPlacement': _hasPlacement,
+                  'count': _activeFilterCount,
+                });
                 Navigator.pop(context);
               },
               child: Text(

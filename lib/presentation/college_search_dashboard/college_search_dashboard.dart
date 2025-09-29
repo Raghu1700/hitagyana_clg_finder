@@ -31,8 +31,7 @@ class _CollegeSearchDashboardState extends State<CollegeSearchDashboard>
   List<String> _savedColleges = [];
 
   final List<Map<String, dynamic>> _recommendationChips = [
-    {"title": "Near Me", "icon": "location_on", "isActive": true},
-    {"title": "Top Ranked", "icon": "star", "isActive": false},
+    {"title": "Top Ranked", "icon": "star", "isActive": true},
     {"title": "Affordable", "icon": "attach_money", "isActive": false},
     {"title": "Engineering", "icon": "engineering", "isActive": false},
     {"title": "Medical", "icon": "local_hospital", "isActive": false},
@@ -46,6 +45,9 @@ class _CollegeSearchDashboardState extends State<CollegeSearchDashboard>
     super.initState();
     _tabController = TabController(length: 4, vsync: this, initialIndex: 0);
     _scrollController.addListener(_onScroll);
+    _searchController.addListener(() {
+      setState(() {}); // Rebuild to update clear button visibility
+    });
     _loadColleges();
     _loadSavedColleges();
   }
@@ -1454,11 +1456,72 @@ class _CollegeSearchDashboardState extends State<CollegeSearchDashboard>
       backgroundColor: Colors.transparent,
       builder: (context) => SearchFilterBottomSheet(
         onFiltersApplied: (filters) {
-          // Handle filter application
-          Navigator.pop(context);
-          Fluttertoast.showToast(msg: "Filters applied successfully");
+          // Apply filters to colleges
+          _applyFilters(filters);
         },
       ),
     );
+  }
+
+  Future<void> _applyFilters(Map<String, dynamic> filters) async {
+    setState(() => _isLoading = true);
+
+    try {
+      final allColleges = await FirebaseService.getAllColleges();
+      final feeRange = filters['feeRange'] as RangeValues;
+      final rankingTier = filters['rankingTier'] as String;
+      final selectedCourses = filters['courses'] as List<String>;
+      final selectedType = filters['type'] as String;
+      final filterCount = filters['count'] as int;
+
+      final filtered = allColleges.where((college) {
+        // Filter by fee range
+        final totalFeeStr = college['totalFee']?.toString() ?? '0';
+        final totalFee = int.tryParse(totalFeeStr.replaceAll(RegExp(r'[₹,]'), '')) ?? 0;
+        if (totalFee < feeRange.start || totalFee > feeRange.end) {
+          return false;
+        }
+
+        // Filter by ranking tier
+        if (rankingTier != "All") {
+          final ranking = college['ranking'] ?? 999;
+          if (rankingTier == "Top 10" && ranking > 10) return false;
+          if (rankingTier == "Top 50" && ranking > 50) return false;
+          if (rankingTier == "Top 100" && ranking > 100) return false;
+        }
+
+        // Filter by courses
+        if (selectedCourses.isNotEmpty) {
+          final collegeCourses = college['courses'] as List<dynamic>? ?? [];
+          final hasMatchingCourse = selectedCourses.any((selectedCourse) =>
+              collegeCourses.any((collegeCourse) =>
+                  collegeCourse.toString().toLowerCase().contains(selectedCourse.toLowerCase())));
+          if (!hasMatchingCourse) return false;
+        }
+
+        // Filter by type
+        if (selectedType != "All" && college['type'] != selectedType) {
+          return false;
+        }
+
+        return true;
+      }).toList();
+
+      setState(() {
+        _filteredColleges = filtered;
+        _isLoading = false;
+      });
+
+      Fluttertoast.showToast(
+        msg: "${filtered.length} colleges found with $filterCount filter${filterCount != 1 ? 's' : ''}",
+        backgroundColor: AppTheme.byzantium,
+      );
+    } catch (e) {
+      setState(() => _isLoading = false);
+      Fluttertoast.showToast(
+        msg: "Error applying filters: $e",
+        backgroundColor: Colors.red,
+      );
+    }
   }
 }

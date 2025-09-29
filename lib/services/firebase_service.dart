@@ -307,4 +307,89 @@ class FirebaseService {
       return false;
     }
   }
+
+  // Add a class to my_classes collection
+  static Future<bool> addMyClass(Map<String, dynamic> classData) async {
+    try {
+      await _firestore.collection('my_classes').add(classData);
+      print('✅ Added class to my_classes collection');
+      return true;
+    } catch (e) {
+      print('Error adding class to my_classes: $e');
+      return false;
+    }
+  }
+
+  // Get all classes from my_classes collection
+  static Future<List<Map<String, dynamic>>> getMyClasses() async {
+    try {
+      final QuerySnapshot querySnapshot = await _firestore
+          .collection('my_classes')
+          .orderBy('enrolledAt', descending: true)
+          .get();
+
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+    } catch (e) {
+      print('Error getting my classes: $e');
+      return [];
+    }
+  }
+
+  // Add a college to saved_colleges collection
+  static Future<bool> addSavedCollege(String userId, Map<String, dynamic> collegeData) async {
+    try {
+      collegeData['userId'] = userId;
+      collegeData['savedAt'] = FieldValue.serverTimestamp();
+      
+      await _firestore
+          .collection('saved_colleges')
+          .doc('${userId}_${collegeData['id']}')
+          .set(collegeData);
+      
+      print('✅ College added to saved_colleges collection');
+      return true;
+    } catch (e) {
+      print('Error adding to saved_colleges: $e');
+      return false;
+    }
+  }
+
+  // Get saved colleges from saved_colleges collection
+  static Future<List<Map<String, dynamic>>> getSavedCollegesData(String userId) async {
+    try {
+      final QuerySnapshot querySnapshot = await _firestore
+          .collection('saved_colleges')
+          .where('userId', isEqualTo: userId)
+          .orderBy('savedAt', descending: true)
+          .get();
+
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return data;
+      }).toList();
+    } catch (e) {
+      print('Error getting saved colleges: $e');
+      return [];
+    }
+  }
+
+  // Remove college from saved_colleges collection
+  static Future<bool> removeSavedCollegeData(String userId, String collegeId) async {
+    try {
+      await _firestore
+          .collection('saved_colleges')
+          .doc('${userId}_$collegeId')
+          .delete();
+      
+      print('✅ College removed from saved_colleges collection');
+      return true;
+    } catch (e) {
+      print('Error removing from saved_colleges: $e');
+      return false;
+    }
+  }
 }

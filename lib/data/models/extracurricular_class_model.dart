@@ -21,6 +21,15 @@ class ExtracurricularClassModel {
   final Map<String, dynamic> metadata;
   final DateTime createdAt;
   final DateTime updatedAt;
+  
+  // Zoom Meeting Information
+  final String? zoomMeetingId;
+  final String? zoomMeetingLink;
+  final String? zoomPassword;
+  final bool isRecurring;
+  final List<String>? recurringDays;
+  final String? meetingTime;
+  final String? timezone;
 
   ExtracurricularClassModel({
     required this.id,
@@ -45,6 +54,13 @@ class ExtracurricularClassModel {
     required this.metadata,
     required this.createdAt,
     required this.updatedAt,
+    this.zoomMeetingId,
+    this.zoomMeetingLink,
+    this.zoomPassword,
+    this.isRecurring = true,
+    this.recurringDays,
+    this.meetingTime,
+    this.timezone = 'IST',
   });
 
   factory ExtracurricularClassModel.fromJson(Map<String, dynamic> json) {
@@ -75,6 +91,15 @@ class ExtracurricularClassModel {
           DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
       updatedAt:
           DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
+      zoomMeetingId: json['zoomMeetingId'],
+      zoomMeetingLink: json['zoomMeetingLink'],
+      zoomPassword: json['zoomPassword'],
+      isRecurring: json['isRecurring'] ?? true,
+      recurringDays: json['recurringDays'] != null
+          ? List<String>.from(json['recurringDays'])
+          : null,
+      meetingTime: json['meetingTime'],
+      timezone: json['timezone'] ?? 'IST',
     );
   }
 
@@ -102,6 +127,13 @@ class ExtracurricularClassModel {
       'metadata': metadata,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'zoomMeetingId': zoomMeetingId,
+      'zoomMeetingLink': zoomMeetingLink,
+      'zoomPassword': zoomPassword,
+      'isRecurring': isRecurring,
+      'recurringDays': recurringDays,
+      'meetingTime': meetingTime,
+      'timezone': timezone,
     };
   }
 
@@ -128,6 +160,13 @@ class ExtracurricularClassModel {
     Map<String, dynamic>? metadata,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? zoomMeetingId,
+    String? zoomMeetingLink,
+    String? zoomPassword,
+    bool? isRecurring,
+    List<String>? recurringDays,
+    String? meetingTime,
+    String? timezone,
   }) {
     return ExtracurricularClassModel(
       id: id ?? this.id,
@@ -152,6 +191,13 @@ class ExtracurricularClassModel {
       metadata: metadata ?? this.metadata,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      zoomMeetingId: zoomMeetingId ?? this.zoomMeetingId,
+      zoomMeetingLink: zoomMeetingLink ?? this.zoomMeetingLink,
+      zoomPassword: zoomPassword ?? this.zoomPassword,
+      isRecurring: isRecurring ?? this.isRecurring,
+      recurringDays: recurringDays ?? this.recurringDays,
+      meetingTime: meetingTime ?? this.meetingTime,
+      timezone: timezone ?? this.timezone,
     );
   }
 }

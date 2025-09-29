@@ -226,27 +226,12 @@ class ClassCardWidget extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        Row(
-          children: [
-            IconButton(
-              onPressed: onWishlist,
-              icon: CustomIconWidget(
-                iconName: isWishlisted ? 'favorite' : 'favorite_border',
-                color: isWishlisted
-                    ? Colors.red
-                    : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                size: 24,
-              ),
-            ),
-            SizedBox(width: 2.w),
-            Text(
-              'Tap to view details',
-              style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
-                color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ],
+        Text(
+          'Tap to view details',
+          style: AppTheme.lightTheme.textTheme.bodySmall?.copyWith(
+            color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+            fontStyle: FontStyle.italic,
+          ),
         ),
       ],
     );

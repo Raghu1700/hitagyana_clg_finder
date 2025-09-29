@@ -40,11 +40,32 @@ class _EnrolledClassesScreenState extends State<EnrolledClassesScreen> {
       final user = AuthService.currentUser;
       if (user != null) {
         _enrolledCourses = await FirebaseService.getEnrolledCourses(user.uid);
+        
+        // Add mock enrolled course for testing
+        _enrolledCourses.add({
+          'id': 'mock_python',
+          'name': 'Python Programming Bootcamp',
+          'instructor': 'Michael Chen',
+          'image': 'https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=400',
+          'rating': 4.9,
+          'category': 'Technology',
+          'price': 4999,
+          'progress': 35,
+          'description': 'Master Python programming with hands-on projects and real-world applications.',
+          'zoomMeetingId': '987 654 3210',
+          'zoomMeetingLink': 'https://zoom.us/j/9876543210?pwd=xyz789',
+          'zoomPassword': 'python123',
+          'isRecurring': true,
+          'recurringDays': ['Tuesday', 'Thursday'],
+          'meetingTime': '8:00 PM - 9:30 PM',
+          'timezone': 'IST',
+        });
+        
         setState(() {
           _filteredCourses = List.from(_enrolledCourses);
           _isLoading = false;
         });
-        print('✅ Loaded ${_enrolledCourses.length} enrolled courses');
+        print('✅ Loaded ${_enrolledCourses.length} enrolled courses (including mock)');
       } else {
         setState(() {
           _enrolledCourses = [];
@@ -247,7 +268,7 @@ class _EnrolledClassesScreenState extends State<EnrolledClassesScreen> {
         Navigator.push(
           context,
           CustomPageRoute(
-            child: CoursePage(course: course),
+            child: CoursePage(course: course, isEnrolled: true),
             routeName: '/course-page',
           ),
         );
@@ -343,7 +364,7 @@ class _EnrolledClassesScreenState extends State<EnrolledClassesScreen> {
                     Navigator.push(
                       context,
                       CustomPageRoute(
-                        child: CoursePage(course: course),
+                        child: CoursePage(course: course, isEnrolled: true),
                         routeName: '/course-page',
                       ),
                     );
